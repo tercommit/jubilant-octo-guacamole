@@ -90,6 +90,9 @@ document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('pointerleave', set(false));
 });
 overlay.addEventListener('pointerdown', () => onConfirm());
+// Safari iOS ignore user-scalable=no : on bloque nous-mêmes le zoom à deux doigts.
+addEventListener('gesturestart', e => e.preventDefault());
+addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 newGameBtn.addEventListener('pointerdown', e => {
   e.stopPropagation();
   clearSave();
@@ -99,9 +102,20 @@ newGameBtn.addEventListener('pointerdown', e => {
 /* ---------- Sons générés (Web Audio) ---------- */
 
 let audio = null;
-function sfx(type) {
+
+// iOS/Safari n'autorise le son qu'après un geste de l'utilisateur :
+// on crée et on « déverrouille » le contexte audio au premier toucher ou à la première touche.
+function unlockAudio() {
   try {
-    audio = audio || new AudioContext();
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === 'suspended') audio.resume();
+  } catch (_) { /* pas de son disponible */ }
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev => addEventListener(ev, unlockAudio, { capture: true }));
+
+function sfx(type) {
+  if (!audio) return;
+  try {
     const t = audio.currentTime;
     const osc = audio.createOscillator();
     const gain = audio.createGain();
