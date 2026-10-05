@@ -3,10 +3,6 @@
 
 const PALETTE = {
   K: '#222034', // contour
-  R: '#d95763', // casquette / cœur
-  S: '#f2c39b', // peau
-  B: '#5b6ee1', // salopette
-  D: '#663931', // chaussures
   W: '#ffffff',
   Y: '#fbf236', // pièce
   y: '#df7126',
@@ -17,47 +13,13 @@ const PALETTE = {
   t: '#847e87',
 };
 
-const PLAYER_TOP = [
-  '................',
-  '.....KKKKK......',
-  '....KRRRRRK.....',
-  '...KRRRRRRRKKK..',
-  '...KRRRRRRRRRRK.',
-  '...KSSSSKSSKKK..',
-  '...KSSSSKSSSK...',
-  '....KSSSSSSK....',
-  '...KKBBBBBBKK...',
-  '..KSKBBBBBBKSK..',
-  '..KSKBBBBBBKSK..',
-  '...KKBBBBBBKK...',
-];
-
-const PLAYER_LEGS = {
-  idle: [
-    '....KBBKKBBK....',
-    '....KBBKKBBK....',
-    '...KDDDKKDDDK...',
-    '...KKKKKKKKKK...',
-  ],
-  run1: [
-    '...KBBK..KBBK...',
-    '..KBBK....KBBK..',
-    '.KDDK......KDDK.',
-    '.KKK.......KKK..',
-  ],
-  run2: [
-    '....KBBBBBK.....',
-    '.....KBBBK......',
-    '....KDDDDK......',
-    '....KKKKK.......',
-  ],
-  jump: [
-    '....KBBK.KBBK...',
-    '...KDDK...KDDK..',
-    '...KKK.....KKK..',
-    '................',
-  ],
-};
+// Le personnage vient d'une planche d'images (player.png) : 10 images d'attente
+// puis 24 images de marche, chacune de PLAYER_FRAME_W × PLAYER_FRAME_H px, pieds en bas.
+const PLAYER_FRAME_W = 27;
+const PLAYER_FRAME_H = 29;
+const PLAYER_ANIMS = { idle: [0, 10], walk: [10, 24], jump: [12, 1] }; // [première image, nombre]
+const playerSheet = new Image();
+playerSheet.src = 'player.png?v=6';
 
 const SLIME_1 = [
   '................', '................', '................', '................',
@@ -166,9 +128,6 @@ function drawDirt(g, r) {
 }
 
 const SPRITES = {
-  player: Object.fromEntries(
-    Object.entries(PLAYER_LEGS).map(([k, legs]) => [k, makeSprite(PLAYER_TOP.concat(legs))])
-  ),
   slime: [makeSprite(SLIME_1), makeSprite(SLIME_2)],
   slimeFlat: makeSprite(SLIME_FLAT),
   coin: makeSprite(COIN),

@@ -430,6 +430,17 @@ function drawSprite(img, x, y, flip) {
   ctx.restore();
 }
 
+// Dessine une image de la planche du joueur, centrée sur (cx) et posée sur (bottom).
+function drawPlayer(index, cx, bottom, flip) {
+  if (!playerSheet.complete || !playerSheet.naturalWidth) return;
+  const w = PLAYER_FRAME_W, h = PLAYER_FRAME_H;
+  const x = Math.round(cx - camX - w / 2), y = Math.round(bottom - camY - h);
+  ctx.save();
+  if (flip) { ctx.translate(x + w, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
+  ctx.drawImage(playerSheet, index * w, 0, w, h, 0, 0, w, h);
+  ctx.restore();
+}
+
 function drawFlag() {
   const x = Math.round(flag.x - camX), y = Math.round(flag.y - camY);
   ctx.fillStyle = '#222034';
@@ -469,10 +480,11 @@ function draw() {
 
   if (game.state !== 'title') {
     const p = player;
-    let frame = 'idle';
-    if (game.state === 'dying' || !p.onGround) frame = 'jump';
-    else if (Math.abs(p.vx) > 0.3) frame = Math.floor(p.anim) % 2 ? 'run1' : 'run2';
-    drawSprite(SPRITES.player[frame], p.x - 3, p.y - 2, p.facing < 0);
+    let anim = 'idle', t = game.frame / 6;
+    if (game.state === 'dying' || !p.onGround) anim = 'jump';
+    else if (Math.abs(p.vx) > 0.3) { anim = 'walk'; t = p.anim * 1.2; }
+    const [first, count] = PLAYER_ANIMS[anim];
+    drawPlayer(first + (Math.floor(t) % count), p.x + p.w / 2, p.y + p.h, p.facing < 0);
   }
 
   particles.forEach(pt => {
