@@ -27,6 +27,29 @@ const hud = {
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayText = document.getElementById('overlay-text');
+const newGameBtn = document.getElementById('new-game');
+
+/* ---------- Sauvegarde dans le navigateur (localStorage) ---------- */
+
+const SAVE_KEY = 'petit-saut-sauvegarde';
+
+function loadSave() {
+  try {
+    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (data && data.level > 0 && data.level < LEVELS.length) return data;
+  } catch (_) { /* stockage indisponible ou données invalides */ }
+  return null;
+}
+
+function writeSave() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ level: game.levelIndex, coins: game.coinsAtLevelStart }));
+  } catch (_) { /* navigation privée, stockage plein… on continue sans sauvegarde */ }
+}
+
+function clearSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (_) { /* rien à faire */ }
+}
 
 /* ---------- Entrées clavier et tactiles ---------- */
 
@@ -47,6 +70,7 @@ addEventListener('keydown', e => {
   if (action) { e.preventDefault(); press(action, true); }
   if (e.code === 'Space' || e.code === 'Enter') onConfirm();
   if (e.code === 'KeyP' || e.code === 'Escape') togglePause();
+  if (e.code === 'KeyN' && !overlay.hidden && game.state !== 'pause') { clearSave(); startGame(); }
 });
 addEventListener('keyup', e => {
   const action = KEYS[e.code];
@@ -66,6 +90,11 @@ document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('pointerleave', set(false));
 });
 overlay.addEventListener('pointerdown', () => onConfirm());
+newGameBtn.addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  clearSave();
+  startGame();
+});
 
 /* ---------- Sons générés (Web Audio) ---------- */
 
@@ -116,7 +145,7 @@ function tileAt(tx, ty) {
 }
 const isSolid = (tx, ty) => { const t = tileAt(tx, ty); return t === '#' || t === '='; };
 
-function loadLevel(i) {
+function loadLevel(i, save = true) {
   const rows = LEVELS[i].map(r => r.split(''));
   map = { rows, w: rows[0].length, h: rows.length };
   enemies = [];
@@ -130,6 +159,7 @@ function loadLevel(i) {
     if (t === 'F') { flag = { x: x + 7, y: y - 4 * TILE, w: 4, h: 5 * TILE }; row[tx] = '.'; }
   }));
   game.coinsAtLevelStart = game.coins;
+  if (save) writeSave();
   updateCamera(true);
   updateHud();
 }
@@ -306,7 +336,7 @@ function update() {
     if (--game.timer <= 0) {
       if (game.lives <= 0) {
         game.state = 'over';
-        showOverlay('Partie terminée', `Pièces : ${game.coins}<br>Espace ou toucher pour rejouer`);
+        showMenu('Partie terminée');
       } else {
         game.coins = game.coinsAtLevelStart;
         loadLevel(game.levelIndex);
@@ -322,6 +352,7 @@ function update() {
         game.state = 'play';
       } else {
         game.state = 'win';
+        clearSave();
         showOverlay('Bravo !', `Tous les niveaux sont terminés.<br>Pièces : ${game.coins}<br>Espace ou toucher pour rejouer`);
       }
     }
@@ -444,17 +475,29 @@ function updateHud() {
   hud.level.textContent = `${game.levelIndex + 1}/${LEVELS.length}`;
 }
 
-function showOverlay(title, text) {
+function showOverlay(title, text, canRestart = false) {
   overlayTitle.textContent = title;
   overlayText.innerHTML = text;
+  newGameBtn.hidden = !canRestart;
   overlay.hidden = false;
 }
 
+// Écran d'accueil ou de fin de partie : propose de reprendre au niveau sauvegardé.
+function showMenu(title) {
+  const save = loadSave();
+  if (save) {
+    showOverlay(title, `Espace ou toucher pour continuer au niveau ${save.level + 1}`, true);
+  } else {
+    showOverlay(title, `Espace ou toucher pour jouer`);
+  }
+}
+
 function startGame() {
-  game.levelIndex = 0;
+  const save = loadSave();
+  game.levelIndex = save ? save.level : 0;
   game.lives = START_LIVES;
-  game.coins = 0;
-  loadLevel(0);
+  game.coins = save ? save.coins : 0;
+  loadLevel(game.levelIndex);
   game.state = 'play';
   overlay.hidden = true;
 }
@@ -488,6 +531,7 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-loadLevel(0);
-updateHud();
+// Niveau 1 en décor derrière l'écran d'accueil, sans écraser la sauvegarde.
+loadLevel(0, false);
+showMenu('Petit Saut');
 requestAnimationFrame(loop);

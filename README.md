@@ -19,6 +19,7 @@ Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut l
 
 - 3 niveaux, avec des pièces, des ennemis, des piques et un drapeau d'arrivée
 - 3 vies (en cas de mort, le niveau recommence)
+- Sauvegarde automatique du niveau atteint dans le navigateur (`localStorage`) : à la réouverture, on reprend au même niveau, ou on clique sur « Nouvelle partie » (touche N)
 - Les sons sont générés en direct avec la Web Audio API (aucun fichier audio)
 
 ## Fichiers

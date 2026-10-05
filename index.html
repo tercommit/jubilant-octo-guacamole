@@ -73,6 +73,16 @@
       text-shadow: 4px 4px 0 var(--heart);
     }
     #overlay p { margin: 0; }
+    #new-game {
+      font: inherit;
+      color: var(--bg);
+      background: var(--accent);
+      border: 0;
+      padding: 0.8em 1.2em;
+      box-shadow: 3px 3px 0 var(--heart);
+      cursor: pointer;
+    }
+    #new-game[hidden] { display: none; }
     .controls { opacity: 0.8; font-size: 0.8em; }
     #touch {
       position: fixed;
@@ -112,7 +122,8 @@
     </div>
     <div id="overlay">
       <h1 id="overlay-title">Petit Saut</h1>
-      <p id="overlay-text">Appuie sur Espace ou touche l'écran pour jouer</p>
+      <p id="overlay-text"></p>
+      <button id="new-game" hidden>Nouvelle partie</button>
       <p class="controls">
         <span class="keys">← → ou Q / D : bouger · Espace, ↑ ou Z : sauter · P : pause</span>
         <span class="tap">Boutons en bas de l'écran</span>
