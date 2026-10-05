@@ -545,7 +545,13 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// Niveau 1 en décor derrière l'écran d'accueil, sans écraser la sauvegarde.
-loadLevel(0, false);
+// Le niveau sauvegardé (ou le niveau 1) sert de décor derrière l'écran d'accueil,
+// pour que le numéro affiché corresponde à celui où l'on reprend.
+const initialSave = loadSave();
+if (initialSave) {
+  game.levelIndex = initialSave.level;
+  game.coins = initialSave.coins;
+}
+loadLevel(game.levelIndex, false);
 showMenu('Petit Saut');
 requestAnimationFrame(loop);
