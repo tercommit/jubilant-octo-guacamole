@@ -40,8 +40,8 @@ Le code, les niveaux et les graphismes de `sprites.js` sont placés dans le doma
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `LICENSE`.
 
 **Exception :** le personnage (`player.png`) n'est pas couvert par CC0. Il est tiré du pack
-« sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), réduit à 50 %
-et retourné pour regarder vers la droite. Il reste soumis à la licence choisie par son auteur ou autrice.
+« sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retourné pour regarder vers la droite.
+Il reste soumis à la licence choisie par son auteur ou autrice.
 
 Pour remplacer les graphismes, les packs de [Kenney](https://kenney.nl/assets) (par exemple
 « Pixel Platformer ») sont eux aussi en CC0 et utilisent des tuiles de 16×16 px.

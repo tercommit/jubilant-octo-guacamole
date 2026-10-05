@@ -15,11 +15,12 @@ const PALETTE = {
 
 // Le personnage vient d'une planche d'images (player.png) : 10 images d'attente
 // puis 24 images de marche, chacune de PLAYER_FRAME_W × PLAYER_FRAME_H px, pieds en bas.
-const PLAYER_FRAME_W = 27;
-const PLAYER_FRAME_H = 29;
+// Elle est dessinée à demi-taille, donc à la résolution réelle de l'écran (voir PIXEL_SCALE).
+const PLAYER_FRAME_W = 50;
+const PLAYER_FRAME_H = 58;
 const PLAYER_ANIMS = { idle: [0, 10], walk: [10, 24], jump: [12, 1] }; // [première image, nombre]
 const playerSheet = new Image();
-playerSheet.src = 'player.png?v=6';
+playerSheet.src = 'player.png?v=7';
 
 const SLIME_1 = [
   '................', '................', '................', '................',

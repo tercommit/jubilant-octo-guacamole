@@ -17,6 +17,10 @@ const START_LIVES = 3;
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+// Le canvas a deux fois plus de pixels que la vue : le décor est agrandi ×2,
+// et le personnage, plus détaillé, profite de la pleine résolution.
+const PIXEL_SCALE = 2;
+ctx.setTransform(PIXEL_SCALE, 0, 0, PIXEL_SCALE, 0, 0);
 ctx.imageSmoothingEnabled = false;
 
 const hud = {
@@ -434,10 +438,10 @@ function drawSprite(img, x, y, flip) {
 function drawPlayer(index, cx, bottom, flip) {
   if (!playerSheet.complete || !playerSheet.naturalWidth) return;
   const w = PLAYER_FRAME_W, h = PLAYER_FRAME_H;
-  const x = Math.round(cx - camX - w / 2), y = Math.round(bottom - camY - h);
+  const x = Math.round(cx - camX - w / 4), y = Math.round(bottom - camY - h / 2);
   ctx.save();
-  if (flip) { ctx.translate(x + w, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
-  ctx.drawImage(playerSheet, index * w, 0, w, h, 0, 0, w, h);
+  if (flip) { ctx.translate(x + w / 2, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
+  ctx.drawImage(playerSheet, index * w, 0, w, h, 0, 0, w / 2, h / 2);
   ctx.restore();
 }
 
