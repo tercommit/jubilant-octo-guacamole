@@ -93,7 +93,7 @@ overlay.addEventListener('pointerdown', () => onConfirm());
 // Safari iOS ignore user-scalable=no : on bloque nous-mêmes le zoom à deux doigts.
 addEventListener('gesturestart', e => e.preventDefault());
 addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-newGameBtn.addEventListener('pointerdown', e => {
+newGameBtn && newGameBtn.addEventListener('pointerdown', e => {
   e.stopPropagation();
   clearSave();
   startGame();
@@ -492,7 +492,7 @@ function updateHud() {
 function showOverlay(title, text, canRestart = false) {
   overlayTitle.textContent = title;
   overlayText.innerHTML = text;
-  newGameBtn.hidden = !canRestart;
+  if (newGameBtn) newGameBtn.hidden = !canRestart;
   overlay.hidden = false;
 }
 
