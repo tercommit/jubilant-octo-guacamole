@@ -211,7 +211,9 @@ function moveAndCollide(e) {
   e.onGround = false;
   const left = Math.floor(e.x / TILE), right = Math.floor((e.x + e.w - 1) / TILE);
   if (e.vy !== 0) {
-    const edge = e.vy > 0 ? e.y + e.h - 1 : e.y;
+    // Bord bas exact (et pas « - 1 ») : sinon une chute de moins d'un pixel ne touche pas
+    // le sol, et onGround alterne vrai/faux une image sur deux quand on marche.
+    const edge = e.vy > 0 ? e.y + e.h - 0.001 : e.y;
     const ty = Math.floor(edge / TILE);
     for (let tx = left; tx <= right; tx++) {
       if (isSolid(tx, ty)) {
