@@ -5,7 +5,7 @@
 
 const Tilt = (() => {
   const DEAD_ZONE = 0.03;  // ≈ 2° : en dessous, on considère le téléphone immobile
-  const FULL_TILT = 0.34;  // ≈ 20° : inclinaison maximale prise en compte
+  const FULL_TILT = 0.45;  // ≈ 27° : inclinaison maximale prise en compte (plus doux)
   const SMOOTHING = 0.2;
   const CALIB_MS = 1000;
 

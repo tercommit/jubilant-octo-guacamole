@@ -3,11 +3,12 @@
 
 const VIEW_W = 480, VIEW_H = 270, GROUND = 240;
 const HAND = { x: 68, y: GROUND - 30 };          // d'où part la boule de feu
-const LAUNCH = { vx: 150, vy: -25 };             // vitesse de départ (px/s)
-const TILT_ACCEL = 300;                          // accélération à inclinaison maximale (px/s²)
-const MAX_SPEED = 260;
-const RAGE = 70;                                 // tremblement de la boule : la rage n'est pas maîtrisée
-const BALL_LIFE = 8;                             // secondes avant que la boule s'éteigne
+const LAUNCH = { vx: 95, vy: -15 };              // vitesse de départ (px/s)
+const TILT_ACCEL = 170;                          // accélération à inclinaison maximale (px/s²)
+const MAX_SPEED = 160;
+const RAGE = 45;                                 // tremblement de la boule : la rage n'est pas maîtrisée
+const BALL_LIFE = 10;                            // secondes avant que la boule s'éteigne
+const CLEAR_DELAY = 1.6;                         // pause sur « Zone purifiée » avant la suite
 const HOLD_MS = 1000;                            // appui long : recalibrer
 const SAVE_KEY = 'gardienne-zone';
 
@@ -40,7 +41,7 @@ const sfx = {
 /* ---------- État ---------- */
 
 const game = {
-  state: 'title', // title | text | calib | aim | flight | over
+  state: 'title', // title | text | calib | aim | flight | cleared | over
   zone: 0,
   shots: 0,
   targets: [],
@@ -78,7 +79,9 @@ function nextText() {
 
 function startZone(i) {
   loadZone(i);
-  showTexts([{ text: ZONES[i].intro, title: ZONES[i].name }], () => { game.state = 'aim'; });
+  const z = ZONES[i];
+  const goal = `Objectif : brûler les ${z.targets.length} cibles avec ${z.shots} boules de feu.`;
+  showTexts([{ text: z.intro, title: z.name, goal }], () => { game.state = 'aim'; });
 }
 
 async function runCalibration(then) {
@@ -99,15 +102,7 @@ function launch() {
 function endBall(x, y) {
   burst(x, y, '#df7126', 16, 70);
   game.ball = null;
-  const alive = game.targets.filter(t => !t.dead).length;
-  if (!alive) {
-    sfx.clear();
-    const last = game.zone === ZONES.length - 1;
-    showTexts([ZONES[game.zone].outro], () => {
-      if (last) { game.state = 'over'; return; }
-      startZone(game.zone + 1);
-    });
-  } else if (game.shots <= 0) {
+  if (game.shots <= 0) {
     showTexts(['Ta rage ne suffit pas encore. Respire… et recommence.'], () => startZone(game.zone));
   } else {
     game.state = 'aim';
@@ -217,12 +212,29 @@ function update(dt) {
         burst(t.x, t.y, '#fbf236', 10, 60);
       }
     }
+    // Dernière cible brûlée : la boule explose tout de suite et la zone est purifiée.
+    if (!game.targets.some(t => !t.dead)) {
+      burst(b.x, b.y, '#fbf236', 40, 120);
+      game.ball = null;
+      game.state = 'cleared';
+      game.clearTimer = CLEAR_DELAY;
+      sfx.clear();
+      return;
+    }
     const blocked = game.zoneObstacles().some(o => hitsRect(b.x, b.y, 4, o));
     const out = b.x < -30 || b.x > VIEW_W + 30 || b.y < -60 || b.y > GROUND - 3;
     if (blocked || out || b.life <= 0) {
       if (blocked || b.y > GROUND - 3) sfx.fizzle();
       endBall(Math.max(0, Math.min(VIEW_W, b.x)), Math.min(GROUND - 3, b.y));
     }
+  }
+
+  if (game.state === 'cleared' && (game.clearTimer -= dt) <= 0) {
+    const last = game.zone === ZONES.length - 1;
+    showTexts([{ title: 'Zone purifiée', text: ZONES[game.zone].outro }], () => {
+      if (last) { game.state = 'over'; return; }
+      startZone(game.zone + 1);
+    });
   }
 
   game.sparks.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt; p.life -= dt; });
@@ -363,7 +375,12 @@ function drawTextPage(page) {
   }
   ctx.font = '8px "Press Start 2P", monospace';
   ctx.fillStyle = '#ffffff';
-  wrap(page.text, VIEW_W - 80).forEach((l, i) => ctx.fillText(l, VIEW_W / 2, y + i * 16));
+  const lines = wrap(page.text, VIEW_W - 80);
+  lines.forEach((l, i) => ctx.fillText(l, VIEW_W / 2, y + i * 16));
+  if (page.goal) {
+    ctx.fillStyle = '#fbf236';
+    wrap(page.goal, VIEW_W - 80).forEach((l, i) => ctx.fillText(l, VIEW_W / 2, y + (lines.length + 1 + i) * 16));
+  }
   if (Math.floor(game.time * 2) % 2) {
     ctx.fillStyle = '#fbf236';
     ctx.fillText('touche pour continuer', VIEW_W / 2, VIEW_H - 30);
@@ -455,6 +472,13 @@ function draw() {
   drawHud();
   if (game.state === 'text' && game.texts.length) drawTextPage(game.texts[0]);
   if (game.state === 'calib') drawCenter('Calibration…', 'Tiens le téléphone comme tu es bien installé, sans bouger');
+  if (game.state === 'cleared') {
+    ctx.textAlign = 'center';
+    ctx.font = '16px "Press Start 2P", monospace';
+    ctx.fillStyle = '#fbf236';
+    ctx.fillText('Zone purifiée !', VIEW_W / 2, 110);
+    ctx.textAlign = 'left';
+  }
   if (game.state === 'over') drawCenter('À suivre…', 'Touche pour recommencer l\'histoire');
   drawHold();
   ctx.restore();
@@ -488,7 +512,8 @@ function drawHud() {
   ctx.textBaseline = 'top';
   ctx.textAlign = 'right';
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(`Cibles ${alive}`, VIEW_W - 10, 10);
+  const total = game.targets.length;
+  ctx.fillText(`Brûlées ${total - alive}/${total}`, VIEW_W - 10, 10);
   ctx.textAlign = 'center';
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   ctx.fillText(ZONES[game.zone].name, VIEW_W / 2, 10);
