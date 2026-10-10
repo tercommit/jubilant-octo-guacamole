@@ -53,17 +53,34 @@ plus difficiles :
 3. une longue pluie, avec un abri en briques au milieu pour attendre la recharge ;
 4. une pluie au-dessus d'un champ de piques, avec une plate-forme pour passer par en haut.
 
+### Mission 2 : le marais empoisonné (faite)
+
+La ravageuse est posée au départ. Juste après, un **gardien de pierre** bouche un tunnel : seule
+la ravageuse le détruit. Le reste du niveau propose des **slimes à piques** (on ne peut pas les
+écraser), des mares de poison, un nid de slimes sous la pluie et des plates-formes au-dessus du
+poison.
+
+### Mission 3 : le volcan (faite)
+
+Un court passage au-dessus de la lave, puis l'arène du Roi des slimes.
+
+### Lanternes
+
+Des lanternes servent de **points de reprise** : après une mort, on repart de la dernière lanterne
+allumée. Sans elles, il faudrait relancer la ravageuse (et perdre une vie) à chaque essai.
+
 ## Les pouvoirs
 
 ### 🛡️ Bouclier (mission 1)
 
 - **2 s** d'invincibilité totale, puis **4 s** de recharge (touche X, bouton B sur mobile).
-- Protège des ennemis, des piques et des projectiles, mais pas des chutes dans le vide.
+- Protège des ennemis, des piques et des projectiles, mais pas des chutes dans le vide,
+  du poison ni de la lave.
 - Sert surtout contre les **pluies de projectiles**, impossibles à esquiver entièrement.
 - Le bouclier clignote pendant sa dernière demi-seconde. Une jauge en haut à gauche montre sa
   durée, puis sa recharge.
 
-### 💥 Ravageuse (mission 2, à faire)
+### 💥 Ravageuse (mission 2)
 
 - Tue **instantanément tous les ennemis à l'écran**.
 - Coûte **1 vie** à chaque utilisation.
@@ -71,6 +88,7 @@ plus difficiles :
   force : les ennemis meurent, elle aussi, et **le niveau est perdu**.
   Exception : le combat contre le Roi (voir la fin alternative).
 - C'est le **seul moyen de vaincre le Roi des slimes**.
+- Touche C, bouton R sur mobile. L'icône clignote en rouge quand il ne reste qu'une vie.
 
 ### Vies
 
@@ -82,10 +100,11 @@ plus difficiles :
 
 1. Le Roi est protégé par une **carapace de slime** : la ravageuse n'a aucun effet tant
    qu'elle est en place.
-2. Il attaque, notamment avec des pluies de projectiles qui couvrent l'écran.
-   Le bouclier permet d'y survivre.
-3. Après une série d'attaques, il s'essouffle et **ouvre sa garde** pendant quelques secondes.
-4. Une **ravageuse** à ce moment-là l'achève **en un seul coup**.
+2. Il fait trois bonds vers Lyra. On peut rebondir sur sa tête, mais ça ne le blesse pas.
+3. Il brille en violet, puis fait tomber une **pluie de slime sur toute l'arène**.
+   Le bouclier permet d'y survivre, à condition de bien choisir le moment.
+4. Il s'essouffle et **ouvre sa garde** pendant un peu plus de 3 secondes.
+5. Une **ravageuse** à ce moment-là l'achève **en un seul coup**. Sinon, le cycle recommence.
 
 Si la ravageuse est lancée hors de ce moment, la vie est perdue sans effet sur le Roi.
 
