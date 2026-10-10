@@ -11,6 +11,8 @@ const PALETTE = {
   e: '#4b9b2f',
   T: '#cbdbfc', // piques
   t: '#847e87',
+  V: '#9b5fc0', // goutte de slime corrompu
+  v: '#5a2f7a',
 };
 
 // Le personnage vient d'une planche d'images (player.png) : 10 images d'attente
@@ -89,6 +91,15 @@ const SPIKES = [
   '................',
 ];
 
+const DROP = [
+  '.KK.',
+  '.KV.',
+  'KVVK',
+  'KVvK',
+  'KvvK',
+  '.KK.',
+];
+
 // Transforme une grille de caractères en petit canvas.
 function makeSprite(rows) {
   const w = Math.max(...rows.map(r => r.length));
@@ -132,6 +143,7 @@ const SPRITES = {
   slime: [makeSprite(SLIME_1), makeSprite(SLIME_2)],
   slimeFlat: makeSprite(SLIME_FLAT),
   coin: makeSprite(COIN),
+  drop: makeSprite(DROP),
   spikes: makeSprite(SPIKES),
   dirt: makeTile(drawDirt, 7),
   grass: makeTile((g, r) => {

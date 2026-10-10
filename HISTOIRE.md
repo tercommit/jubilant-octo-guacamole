@@ -34,22 +34,36 @@ part reprendre la magie, région après région, et retrouve un pouvoir à chaqu
 
 ## Les missions
 
-| # | Lieu             | Dangers                                              | Récompense       |
-|---|------------------|------------------------------------------------------|------------------|
-| 1 | Forêt brumeuse   | Slimes, piques, premières **pluies de projectiles**  | 🛡️ Bouclier       |
-| 2 | Marais empoisonné | Pluies de projectiles plus denses, plus d'ennemis   | 💥 Ravageuse      |
-| 3 | Volcan           | Le **Roi des slimes**                                | Fin du jeu       |
+| # | Lieu             | Pouvoir trouvé au début | Dangers                                              |
+|---|------------------|-------------------------|------------------------------------------------------|
+| 1 | Forêt brumeuse   | 🛡️ Bouclier              | Slimes, piques, premières **pluies de projectiles**  |
+| 2 | Marais empoisonné | 💥 Ravageuse            | Pluies de projectiles plus denses, plus d'ennemis    |
+| 3 | Volcan           | —                       | Le **Roi des slimes**                                |
 
-Les missions se débloquent dans l'ordre sur la carte de l'île.
+Les missions se débloquent dans l'ordre sur la carte de l'île. Chaque pouvoir se ramasse
+**au début** de sa mission : le reste du niveau apprend à s'en servir. Une fois ramassé, il est acquis.
+
+### Mission 1 : la forêt brumeuse (faite)
+
+Le bouclier est posé juste après le départ. Viennent ensuite quatre zones de pluie, de plus en
+plus difficiles :
+
+1. sur un terrain plat, pour apprendre ;
+2. avec un slime et des piques sous la pluie ;
+3. une longue pluie, avec un abri en briques au milieu pour attendre la recharge ;
+4. une pluie au-dessus d'un champ de piques, avec une plate-forme pour passer par en haut.
 
 ## Les pouvoirs
 
 ### 🛡️ Bouclier (mission 1)
 
-- **2 s** d'invincibilité totale, puis **4 s** de recharge.
+- **2 s** d'invincibilité totale, puis **4 s** de recharge (touche X, bouton B sur mobile).
+- Protège des ennemis, des piques et des projectiles, mais pas des chutes dans le vide.
 - Sert surtout contre les **pluies de projectiles**, impossibles à esquiver entièrement.
+- Le bouclier clignote pendant sa dernière demi-seconde. Une jauge en haut à gauche montre sa
+  durée, puis sa recharge.
 
-### 💥 Ravageuse (mission 2)
+### 💥 Ravageuse (mission 2, à faire)
 
 - Tue **instantanément tous les ennemis à l'écran**.
 - Coûte **1 vie** à chaque utilisation.

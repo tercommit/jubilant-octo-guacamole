@@ -12,6 +12,7 @@ Il est écrit en HTML, CSS et JavaScript, sans aucune dépendance.
 | Bouger  | Flèches ou Z Q S D (ou W A S D) | Croix ◀ ▲ ▼ ▶ |
 | Sauter  | Espace, ↑, Z ou W          | Bouton A      |
 | Entrer, boire, lire (sur l'île) | Espace ou Entrée | Bouton A |
+| Bouclier (une fois trouvé) | X                | Bouton B      |
 | Pause   | P ou Échap                 |               |
 
 Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut lui sauter dessus.
@@ -21,6 +22,8 @@ Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut l
 - L'île de Brumelune, vue de dessus (style Pokémon) : on s'y déplace case par case et on entre
   dans les missions. Les arbres passent devant le personnage (effet 2.5D).
 - 3 missions (forêt brumeuse, marais empoisonné, volcan) : chacune ouvre, dans la brume, le chemin de la suivante
+- La forêt brumeuse donne le bouclier (2 s d'invincibilité, 4 s de recharge) et fait tomber des
+  pluies de slime des nuages de brume
 - La source de soin, au centre de l'île, redonne toutes les vies : c'est le seul endroit où se soigner
 - 3 vies (en cas de mort, la mission recommence ; sans vie, on se réveille près de la source)
 - Sauvegarde automatique dans le navigateur (`localStorage`) : missions terminées, vies, pièces et position

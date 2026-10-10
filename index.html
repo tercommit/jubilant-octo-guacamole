@@ -123,7 +123,9 @@
     #touch [data-action="down"] { grid-area: down; }
     #touch [data-action="left"] { grid-area: left; }
     #touch [data-action="right"] { grid-area: right; }
-    #touch .action { align-self: flex-end; font-family: inherit; font-size: 20px; }
+    #touch .buttons { display: flex; gap: 16px; align-self: flex-end; }
+    #touch .action { font-family: inherit; font-size: 20px; }
+    body:not(.can-shield) #touch [data-action="power"] { visibility: hidden; }
     /* Haut et bas ne servent que sur la carte de l'île. */
     body:not(.on-world) #touch [data-action="up"],
     body:not(.on-world) #touch [data-action="down"] { visibility: hidden; }
@@ -149,7 +151,7 @@
       <p id="overlay-text"></p>
       <button id="new-game" hidden>Nouvelle partie</button>
       <p class="controls">
-        <span class="keys">Flèches ou ZQSD : bouger · Espace : sauter, entrer, parler · P : pause</span>
+        <span class="keys">Flèches ou ZQSD : bouger · Espace : sauter, entrer, parler · X : bouclier · P : pause</span>
         <span class="tap">Boutons en bas de l'écran</span>
       </p>
     </div>
@@ -162,7 +164,10 @@
       <button data-action="down" aria-label="Bas">▼</button>
       <button data-action="right" aria-label="Droite">▶</button>
     </div>
-    <button class="action" data-action="jump" aria-label="Sauter ou agir">A</button>
+    <div class="buttons">
+      <button class="action" data-action="power" aria-label="Bouclier">B</button>
+      <button class="action" data-action="jump" aria-label="Sauter ou agir">A</button>
+    </div>
   </div>
 
   <!-- Affiche les erreurs à l'écran : utile pour comprendre un problème sur téléphone. -->
@@ -175,9 +180,9 @@
     });
   </script>
   <!-- Le paramètre ?v= force le navigateur à recharger les scripts après chaque mise à jour. -->
-  <script src="sprites.js?v=10"></script>
-  <script src="levels.js?v=10"></script>
-  <script src="world.js?v=10"></script>
-  <script src="game.js?v=10"></script>
+  <script src="sprites.js?v=11"></script>
+  <script src="levels.js?v=11"></script>
+  <script src="world.js?v=11"></script>
+  <script src="game.js?v=11"></script>
 </body>
 </html>

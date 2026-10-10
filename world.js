@@ -41,7 +41,7 @@ const WORLD = [
 // Une mission par entrée (1, 2, 3) : le niveau de LEVELS qu'elle lance.
 // « unlock » s'affiche la première fois qu'on la termine.
 const MISSIONS = [
-  { name: 'Forêt brumeuse', level: 0, color: '#6abe30',
+  { name: 'Forêt brumeuse', level: 0, color: '#6abe30', theme: 'forest',
     unlock: 'La brume se dissipe au sud : le chemin du marais empoisonné est ouvert.' },
   { name: 'Marais empoisonné', level: 1, color: '#9b5fc0',
     unlock: 'La brume se dissipe au nord : le volcan du Roi des slimes vous attend.' },
@@ -70,7 +70,6 @@ const world = {
   move: 0, // images restantes avant la fin du pas
   facing: 1,
   walk: 0,
-  messages: [],
 };
 world.rows.forEach((row, y) => row.forEach((t, x) => {
   if (t === 'P') world.start = { x, y };
@@ -126,11 +125,11 @@ function finishMission() {
     return;
   }
   enterWorld();
-  if (firstTime && MISSIONS[i].unlock) world.messages.push(MISSIONS[i].unlock);
+  if (firstTime && MISSIONS[i].unlock) game.messages.push(MISSIONS[i].unlock);
 }
 
 function showMessages(pages) {
-  world.messages.push(...pages);
+  game.messages.push(...pages);
 }
 
 function nextToSpring() {
@@ -139,7 +138,7 @@ function nextToSpring() {
 
 // Ce que fait le bouton d'action (Espace / A) à l'endroit où l'on se trouve.
 function worldAction() {
-  if (world.messages.length || world.move) return null;
+  if (game.messages.length || world.move) return null;
   const t = worldTile(world.x, world.y);
   if ('123'.includes(t)) {
     const i = Number(t) - 1;
@@ -163,13 +162,13 @@ function drinkSpring() {
 }
 
 function worldConfirm() {
-  if (world.messages.length) { world.messages.shift(); return; }
+  if (game.messages.length) { game.messages.shift(); return; }
   const action = worldAction();
   if (action) action.run();
 }
 
 function updateWorld() {
-  if (world.messages.length) return;
+  if (game.messages.length) return;
   if (world.move > 0) {
     world.walk += 0.4;
     if (--world.move === 0) {
@@ -469,7 +468,7 @@ function drawWorld() {
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
   if (game.state !== 'world') return;
-  if (world.messages.length) drawTextBox(world.messages[0], true);
+  if (game.messages.length) drawTextBox(game.messages[0], true);
   else {
     const action = worldAction();
     if (action) drawTextBox(action.text, false);

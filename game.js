@@ -14,6 +14,8 @@ const MAX_FALL = 7;
 const COYOTE_FRAMES = 6;
 const JUMP_BUFFER_FRAMES = 6;
 const START_LIVES = 3;
+const SHIELD_FRAMES = 120; // 2 s d'invincibilité
+const SHIELD_COOLDOWN = 240; // puis 4 s de recharge
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -43,7 +45,8 @@ function loadSave() {
     if (!data) return null;
     // Ancienne sauvegarde ({ level, coins }) : les niveaux passés deviennent des missions terminées.
     if (data.done === undefined && data.level > 0) {
-      return { done: Math.min(data.level, MISSIONS.length - 1), coins: data.coins || 0 };
+      const done = Math.min(data.level, MISSIONS.length - 1);
+      return { done, coins: data.coins || 0, powers: { shield: done >= 1 } };
     }
     if (data.done >= 0 && data.done < MISSIONS.length) return data;
   } catch (_) { /* stockage indisponible ou données invalides */ }
@@ -56,6 +59,7 @@ function writeSave() {
       done: game.done,
       lives: game.lives,
       coins: game.view === 'level' ? game.coinsAtLevelStart : game.coins,
+      powers: game.powers,
       x: world.x,
       y: world.y,
     }));
@@ -68,17 +72,22 @@ function clearSave() {
 
 /* ---------- Entrées clavier et tactiles ---------- */
 
-const input = { left: false, right: false, up: false, down: false, jump: false, jumpPressed: false };
+const input = {
+  left: false, right: false, up: false, down: false,
+  jump: false, jumpPressed: false, power: false, powerPressed: false,
+};
 const KEYS = {
   ArrowLeft: 'left', KeyA: 'left', KeyQ: 'left',
   ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'jump', KeyW: 'jump', KeyZ: 'jump', Space: 'jump',
+  KeyX: 'power',
 };
 // Haut et bas ne servent que sur la carte de l'île (en mission, haut fait sauter).
 const VERTICAL_KEYS = { ArrowUp: 'up', KeyW: 'up', KeyZ: 'up', ArrowDown: 'down', KeyS: 'down' };
 
 function press(action, down) {
   if (action === 'jump' && down && !input.jump) input.jumpPressed = true;
+  if (action === 'power' && down && !input.power) input.powerPressed = true;
   input[action] = down;
 }
 
@@ -101,8 +110,8 @@ document.querySelectorAll('[data-action]').forEach(btn => {
   const set = down => e => {
     e.preventDefault();
     press(action, down);
-    // Sur l'île, seul le bouton A agit (entrer, boire, lire) : les flèches servent à marcher.
-    if (down && (action === 'jump' || game.state !== 'world')) onConfirm();
+    // Seul le bouton A agit (entrer, boire, lire), sauf sur les écrans de menu où tout bouton convient.
+    if (down && (action === 'jump' || !overlay.hidden)) onConfirm();
   };
   btn.addEventListener('pointerdown', set(true));
   btn.addEventListener('pointerup', set(false));
@@ -145,6 +154,9 @@ function sfx(type) {
       stomp: ['triangle', 400, 80, 0.15],
       hurt: ['sawtooth', 300, 60, 0.4],
       win: ['square', 520, 1040, 0.5],
+      shield: ['sine', 300, 900, 0.3],
+      pickup: ['square', 440, 1760, 0.5],
+      drop: ['triangle', 900, 300, 0.08],
     };
     const [wave, from, to, dur] = tones[type];
     osc.type = wave;
@@ -165,6 +177,8 @@ const game = {
   view: 'world', // ce qui est affiché : l'île (world) ou une mission (level)
   paused: null, // état à retrouver en sortant de la pause
   done: 0, // nombre de missions terminées
+  powers: { shield: false },
+  messages: [], // textes à lire (Espace / A pour passer au suivant)
   mission: 0,
   levelIndex: 0,
   lives: START_LIVES,
@@ -175,6 +189,7 @@ const game = {
 };
 
 let map, player, enemies, coins, flag, particles = [], camX = 0, camY = 0;
+let pickups = [], rainClouds = [], drops = [];
 
 function tileAt(tx, ty) {
   if (tx < 0 || tx >= map.w) return '#';
@@ -189,12 +204,20 @@ function loadLevel(i, save = true) {
   enemies = [];
   coins = [];
   particles = [];
+  pickups = [];
+  rainClouds = [];
+  drops = [];
   rows.forEach((row, ty) => row.forEach((t, tx) => {
     const x = tx * TILE, y = ty * TILE;
     if (t === 'P') { player = makePlayer(x + 3, y + 2); row[tx] = '.'; }
     if (t === 'e') { enemies.push({ x: x + 2, y: y + 7, w: 12, h: 9, vx: -0.5, vy: 0, dead: 0 }); row[tx] = '.'; }
     if (t === 'o') { coins.push({ x: x + 3, y: y + 2, w: 10, h: 11, taken: false }); row[tx] = '.'; }
     if (t === 'F') { flag = { x: x + 7, y: y - 4 * TILE, w: 4, h: 5 * TILE }; row[tx] = '.'; }
+    if (t === 'B') {
+      if (!game.powers.shield) pickups.push({ x: x + 2, y: y + 2, w: 12, h: 12, power: 'shield' });
+      row[tx] = '.';
+    }
+    if (t === 'c') { rainClouds.push({ x, y, timer: Math.random() * 60 }); row[tx] = '.'; }
   }));
   game.coinsAtLevelStart = game.coins;
   if (save) writeSave();
@@ -203,7 +226,11 @@ function loadLevel(i, save = true) {
 }
 
 function makePlayer(x, y) {
-  return { x, y, w: 10, h: 14, vx: 0, vy: 0, onGround: false, coyote: 0, buffer: 0, facing: 1, anim: 0 };
+  return {
+    x, y, w: 10, h: 14, vx: 0, vy: 0, onGround: false, coyote: 0, buffer: 0, facing: 1, anim: 0,
+    shield: 0, // images de bouclier restantes
+    shieldCooldown: 0,
+  };
 }
 
 /* ---------- Déplacements et collisions ---------- */
@@ -306,6 +333,19 @@ function updatePlayer() {
     }
   });
 
+  updateShield(p);
+
+  for (const pk of pickups) {
+    if (pk.taken || !overlaps(p, pk)) continue;
+    pk.taken = true;
+    game.powers[pk.power] = true;
+    sfx('pickup');
+    burst(pk.x + 6, pk.y + 6, '#5fcde4', 14);
+    writeSave();
+    updateHud();
+    showMessages(POWER_TEXTS[pk.power]);
+  }
+
   for (const en of enemies) {
     if (en.dead || !overlaps(p, en)) continue;
     if (p.vy > 0 && p.y + p.h - en.y < 8) {
@@ -313,18 +353,67 @@ function updatePlayer() {
       p.vy = input.jump ? JUMP_SPEED : -5;
       sfx('stomp');
       burst(en.x + 6, en.y + 4, '#99e550');
-    } else {
+    } else if (!p.shield) {
       return hurt();
     }
   }
 
-  if (touchesSpikes(p) || p.y > map.h * TILE + 32) return hurt();
+  // Le bouclier protège de tout, sauf des chutes dans le vide.
+  if ((touchesSpikes(p) && !p.shield) || p.y > map.h * TILE + 32) return hurt();
 
   if (overlaps(p, flag)) {
     game.state = 'clear';
     game.timer = 90;
     sfx('win');
   }
+}
+
+const POWER_TEXTS = {
+  shield: [
+    'Lyra retrouve un fragment de sa magie : le bouclier !',
+    'X (ou bouton B) : 2 secondes d\'invincibilité, puis 4 secondes de recharge.',
+    'Méfie-toi des nuages de brume : leur pluie de slime est impossible à esquiver entièrement.',
+  ],
+};
+
+function updateShield(p) {
+  if (p.shield > 0) {
+    if (--p.shield === 0) p.shieldCooldown = SHIELD_COOLDOWN;
+  } else if (p.shieldCooldown > 0) {
+    p.shieldCooldown--;
+  } else if (input.powerPressed && game.powers.shield) {
+    p.shield = SHIELD_FRAMES;
+    sfx('shield');
+  }
+}
+
+// Les nuages de brume lâchent des gouttes de slime quand Lyra approche.
+function updateRain() {
+  const px = player.x + player.w / 2;
+  for (const c of rainClouds) {
+    if (Math.abs(c.x + 8 - px) > VIEW_W) continue;
+    if (--c.timer <= 0) {
+      drops.push({ x: c.x + 2 + Math.random() * 10, y: c.y + 10, w: 4, h: 6, vy: 1 });
+      c.timer = 35 + Math.random() * 40;
+    }
+  }
+  for (const d of drops) {
+    d.vy = Math.min(d.vy + 0.12, 3.5);
+    d.y += d.vy;
+    if (isSolid(Math.floor((d.x + 2) / TILE), Math.floor((d.y + d.h) / TILE)) || d.y > map.h * TILE) {
+      d.gone = true;
+      if (d.y < map.h * TILE && Math.abs(d.x - px) < VIEW_W / 2) burst(d.x + 2, d.y + d.h, '#76428a', 2);
+    } else if (overlaps(player, d)) {
+      d.gone = true;
+      if (player.shield) {
+        burst(d.x + 2, d.y + 3, '#5fcde4', 3);
+        sfx('drop');
+      } else {
+        return hurt();
+      }
+    }
+  }
+  drops = drops.filter(d => !d.gone);
 }
 
 function updateEnemies() {
@@ -366,10 +455,13 @@ function update() {
   particles.forEach(pt => { pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.life--; });
   particles = particles.filter(pt => pt.life > 0);
 
-  if (game.state === 'world') {
+  if (game.messages.length && (game.state === 'world' || game.state === 'play')) {
+    // Le jeu attend qu'on ait lu le texte affiché.
+  } else if (game.state === 'world') {
     updateWorld();
   } else if (game.state === 'play') {
     updatePlayer();
+    if (game.state === 'play') updateRain();
     updateEnemies();
     updateCamera(false);
   } else if (game.state === 'dying') {
@@ -396,19 +488,31 @@ function update() {
     if (--game.timer <= 0) finishMission();
   }
   input.jumpPressed = false;
+  input.powerPressed = false;
 }
 
 /* ---------- Affichage ---------- */
 
+// Couleurs du décor de fond, selon la mission.
+const THEMES = {
+  default: { sky: ['#5fcde4', '#cbf1f5'], clouds: '#ffffff', hills: ['#a2d89b', '#6abe30'] },
+  forest: { sky: ['#1b2633', '#5b7470'], clouds: 'rgba(200,210,220,0.18)', hills: ['#2f4a3c', '#22382b'], fog: 0.16 },
+};
+
+function levelTheme() {
+  return THEMES[MISSIONS[game.mission].theme] || THEMES.default;
+}
+
 function drawBackground() {
+  const theme = levelTheme();
   const sky = ctx.createLinearGradient(0, 0, 0, VIEW_H);
-  sky.addColorStop(0, '#5fcde4');
-  sky.addColorStop(1, '#cbf1f5');
+  sky.addColorStop(0, theme.sky[0]);
+  sky.addColorStop(1, theme.sky[1]);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
   // Nuages
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = theme.clouds;
   for (let i = 0; i < 8; i++) {
     const x = ((i * 137 - camX * 0.1) % (VIEW_W + 80) + VIEW_W + 80) % (VIEW_W + 80) - 40;
     const y = 18 + (i * 53) % 50;
@@ -417,7 +521,7 @@ function drawBackground() {
   }
 
   // Collines en deux couches, pour l'effet de profondeur
-  const hills = [[0.2, 110, '#a2d89b', 0.03, 18], [0.45, 130, '#6abe30', 0.05, 14]];
+  const hills = [[0.2, 110, theme.hills[0], 0.03, 18], [0.45, 130, theme.hills[1], 0.05, 14]];
   for (const [speed, base, color, freq, amp] of hills) {
     ctx.fillStyle = color;
     for (let x = 0; x < VIEW_W; x += 2) {
@@ -503,6 +607,8 @@ function draw() {
     drawSprite(img, en.x - 2, en.y - 7, en.vx > 0);
   });
 
+  pickups.forEach(drawPickup);
+
   {
     const p = player;
     let anim = 'idle', t = game.frame / 6;
@@ -510,12 +616,99 @@ function draw() {
     else if (Math.abs(p.vx) > 0.3) { anim = 'walk'; t = p.anim * 1.2; }
     const [first, count] = PLAYER_ANIMS[anim];
     drawPlayer(first + (Math.floor(t) % count), p.x + p.w / 2, p.y + p.h, p.facing < 0);
+    drawShieldBubble(p);
   }
+
+  drops.forEach(d => drawSprite(SPRITES.drop, d.x, d.y));
+  rainClouds.forEach(drawRainCloud);
 
   particles.forEach(pt => {
     ctx.fillStyle = pt.color;
     ctx.fillRect(Math.round(pt.x - camX), Math.round(pt.y - camY), 2, 2);
   });
+
+  const fog = levelTheme().fog;
+  if (fog) {
+    // Bancs de brume au premier plan, qui défilent plus vite que le décor.
+    ctx.fillStyle = `rgba(190,200,210,${fog})`;
+    for (let i = 0; i < 5; i++) {
+      const x = ((i * 151 - camX * 1.2 + game.frame * 0.2) % (VIEW_W + 160) + VIEW_W + 160) % (VIEW_W + 160) - 80;
+      ctx.beginPath();
+      ctx.ellipse(x, 140 + (i * 37) % 40 - camY, 70, 10, 0, 0, 7);
+      ctx.fill();
+    }
+  }
+
+  drawShieldGauge();
+  if (game.messages.length) drawTextBox(game.messages[0], true);
+}
+
+function drawPickup(pk) {
+  if (pk.taken) return;
+  const bob = Math.round(Math.sin(game.frame * 0.08) * 2);
+  const x = Math.round(pk.x + 6 - camX), y = Math.round(pk.y + 6 - camY) + bob;
+  ctx.globalAlpha = 0.3 + 0.2 * Math.sin(game.frame * 0.1);
+  ctx.fillStyle = '#5fcde4';
+  ctx.beginPath();
+  ctx.arc(x, y, 10, 0, 7);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  drawShieldIcon(x - 4, y - 5);
+}
+
+// Petit écusson de 9 × 10 px.
+function drawShieldIcon(x, y, color = '#5fcde4') {
+  ctx.fillStyle = '#222034';
+  ctx.fillRect(x - 1, y - 1, 11, 9);
+  ctx.fillRect(x, y + 8, 9, 2);
+  ctx.fillRect(x + 2, y + 10, 5, 1);
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, 9, 8);
+  ctx.fillRect(x + 1, y + 8, 7, 1);
+  ctx.fillRect(x + 3, y + 9, 3, 1);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(x + 1, y + 1, 2, 4);
+}
+
+function drawShieldBubble(p) {
+  if (!p.shield) return;
+  // Clignote pendant la dernière demi-seconde pour prévenir que le bouclier va disparaître.
+  if (p.shield < 30 && (p.shield >> 2) % 2) return;
+  const x = Math.round(p.x + p.w / 2 - camX), y = Math.round(p.y + p.h / 2 - 2 - camY);
+  ctx.fillStyle = 'rgba(95,205,228,0.2)';
+  ctx.strokeStyle = 'rgba(203,241,245,0.9)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(x, y, 13, 0, 7);
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawShieldGauge() {
+  if (!game.powers.shield || game.view !== 'level') return;
+  const p = player, x = 8, y = 22;
+  const ready = !p.shield && !p.shieldCooldown;
+  drawShieldIcon(x, y, ready || p.shield ? '#5fcde4' : '#847e87');
+  const ratio = p.shield ? p.shield / SHIELD_FRAMES : 1 - p.shieldCooldown / SHIELD_COOLDOWN;
+  ctx.fillStyle = '#222034';
+  ctx.fillRect(x + 12, y + 3, 26, 5);
+  ctx.fillStyle = p.shield ? '#cbf1f5' : ready ? '#5fcde4' : '#847e87';
+  ctx.fillRect(x + 13, y + 4, Math.round(24 * ratio), 3);
+}
+
+function drawRainCloud(c, i) {
+  const x = Math.round(c.x - camX), y = Math.round(c.y - camY + Math.sin(game.frame * 0.03 + i) * 1.5);
+  if (x < -32 || x > VIEW_W + 16) return;
+  ctx.fillStyle = '#2a2238';
+  ctx.beginPath();
+  ctx.arc(x + 4, y + 8, 7, 0, 7);
+  ctx.arc(x + 12, y + 6, 8, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#4a3d5e';
+  ctx.beginPath();
+  ctx.arc(x + 4, y + 6, 5, 0, 7);
+  ctx.arc(x + 12, y + 4, 6, 0, 7);
+  ctx.fill();
 }
 
 /* ---------- Interface ---------- */
@@ -524,6 +717,7 @@ function updateHud() {
   hud.lives.textContent = '♥'.repeat(Math.max(0, game.lives));
   hud.coins.textContent = game.coins;
   document.body.classList.toggle('on-world', game.view === 'world');
+  document.body.classList.toggle('can-shield', game.view === 'level' && game.powers.shield);
   hud.level.textContent = game.view === 'world' ? 'Brumelune' : MISSIONS[game.mission].name;
 }
 
@@ -550,7 +744,8 @@ function startGame() {
   game.done = save ? save.done : 0;
   game.lives = save && save.lives > 0 ? save.lives : START_LIVES;
   game.coins = save ? save.coins : 0;
-  world.messages = [];
+  game.powers = (save && save.powers) || { shield: false };
+  game.messages = [];
   const pos = save && worldCanWalk(save.x, save.y) ? save : world.start;
   enterWorld(pos);
   if (!save) showMessages(INTRO);
@@ -561,6 +756,10 @@ function onConfirm() {
   else if (game.state === 'over') enterWorld();
   else if (game.state === 'pause') togglePause();
   else if (game.state === 'world') worldConfirm();
+  else if (game.state === 'play' && game.messages.length) {
+    game.messages.shift();
+    input.jumpPressed = false; // la touche qui ferme le texte ne fait pas sauter
+  }
 }
 
 function togglePause() {
