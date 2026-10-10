@@ -53,7 +53,9 @@ Les missions se débloquent dans l'ordre sur la carte de l'île.
 
 - Tue **instantanément tous les ennemis à l'écran**.
 - Coûte **1 vie** à chaque utilisation.
-- **Ne peut pas être lancée avec la dernière vie** (sinon on perdrait la partie en la lançant).
+- Peut être lancée **même avec la dernière vie**, mais la magicienne y laisse sa dernière
+  force : les ennemis meurent, elle aussi, et **le niveau est perdu**.
+  Exception : le combat contre le Roi (voir la fin alternative).
 - C'est le **seul moyen de vaincre le Roi des slimes**.
 
 ### Vies
@@ -71,10 +73,24 @@ Les missions se débloquent dans l'ordre sur la carte de l'île.
 3. Après une série d'attaques, il s'essouffle et **ouvre sa garde** pendant quelques secondes.
 4. Une **ravageuse** à ce moment-là l'achève **en un seul coup**.
 
-## La fin
+Si la ravageuse est lancée hors de ce moment, la vie est perdue sans effet sur le Roi.
+
+## Les fins
+
+### Fin normale : le gardien retrouvé
+
+Le Roi est vaincu alors que la magicienne a encore au moins une vie après la ravageuse.
 
 La ravageuse brise la corruption qui possédait le Roi. Il redevient le **gardien bienveillant**
 de l'île, rend la magie, la brume se lève et les slimes redeviennent amicaux.
+
+### Fin alternative : le sacrifice
+
+Le Roi est achevé par une ravageuse lancée **avec la dernière vie**.
+
+Le Roi est libéré et la magie revient, mais la magicienne a donné ses dernières forces.
+Dernière scène : sous un ciel enfin dégagé, les villageois et les slimes se rassemblent pour
+**l'enterrement de la magicienne**, qui s'est sacrifiée pour le peuple de l'île.
 
 ## La carte de l'île (à faire)
 
