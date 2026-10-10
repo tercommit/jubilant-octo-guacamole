@@ -107,7 +107,7 @@ addEventListener('keyup', e => {
   if (VERTICAL_KEYS[e.code]) press(VERTICAL_KEYS[e.code], false);
 });
 
-document.querySelectorAll('[data-action]').forEach(btn => {
+document.querySelectorAll('[data-action]:not([data-action="ravage"])').forEach(btn => {
   const action = btn.dataset.action;
   const set = down => e => {
     e.preventDefault();
@@ -120,6 +120,27 @@ document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('pointercancel', set(false));
   btn.addEventListener('pointerleave', set(false));
 });
+// Bouton R : il faut le maintenir un court instant, pour ne pas perdre une vie sur un appui par erreur.
+const RAVAGE_HOLD_MS = 450;
+const ravageBtn = document.querySelector('[data-action="ravage"]');
+let ravageHold = null;
+function cancelRavageHold() {
+  clearTimeout(ravageHold);
+  ravageHold = null;
+  ravageBtn.classList.remove('charging');
+}
+ravageBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  cancelRavageHold();
+  ravageBtn.classList.add('charging');
+  ravageHold = setTimeout(() => {
+    cancelRavageHold();
+    press('ravage', true);
+    press('ravage', false);
+  }, RAVAGE_HOLD_MS);
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => ravageBtn.addEventListener(ev, cancelRavageHold));
+
 overlay.addEventListener('pointerdown', () => onConfirm());
 // Safari iOS ignore user-scalable=no : on bloque nous-mêmes le zoom à deux doigts.
 addEventListener('gesturestart', e => e.preventDefault());

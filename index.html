@@ -123,11 +123,27 @@
     #touch [data-action="down"] { grid-area: down; }
     #touch [data-action="left"] { grid-area: left; }
     #touch [data-action="right"] { grid-area: right; }
-    #touch .buttons { display: flex; gap: 16px; align-self: flex-end; }
+    /* R est placé au-dessus de B, loin de A (sauter), pour éviter de le toucher par erreur. */
+    #touch .buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 64px);
+      grid-template-areas: "ravage ." "power jump";
+      gap: 20px 16px;
+      align-self: flex-end;
+    }
+    #touch [data-action="ravage"] { grid-area: ravage; }
+    #touch [data-action="power"] { grid-area: power; }
+    #touch .buttons [data-action="jump"] { grid-area: jump; }
     #touch .action { font-family: inherit; font-size: 20px; }
     body:not(.can-shield) #touch [data-action="power"] { visibility: hidden; }
     body:not(.can-ravage) #touch [data-action="ravage"] { display: none; }
-    #touch [data-action="ravage"] { border-color: rgba(223, 113, 38, 0.8); }
+    #touch [data-action="ravage"] {
+      border-color: rgba(223, 113, 38, 0.8);
+      background: linear-gradient(to top, rgba(223, 113, 38, 0.85) 50%, rgba(34, 32, 52, 0.45) 50%) top / 100% 200%;
+      transition: background-position 0s;
+    }
+    /* Pendant l'appui, le bouton se remplit d'orange jusqu'au lancement. */
+    #touch [data-action="ravage"].charging { background-position: bottom; transition: background-position 0.45s linear; }
     /* Scène de fin : le texte se place en haut et laisse voir l'image. */
     #overlay.scene { justify-content: flex-start; background: rgba(34, 32, 52, 0.45); }
     #overlay.scene h1 { font-size: 1.6em; }
@@ -187,10 +203,10 @@
     });
   </script>
   <!-- Le paramètre ?v= force le navigateur à recharger les scripts après chaque mise à jour. -->
-  <script src="sprites.js?v=13"></script>
-  <script src="levels.js?v=13"></script>
-  <script src="world.js?v=13"></script>
-  <script src="boss.js?v=13"></script>
-  <script src="game.js?v=13"></script>
+  <script src="sprites.js?v=14"></script>
+  <script src="levels.js?v=14"></script>
+  <script src="world.js?v=14"></script>
+  <script src="boss.js?v=14"></script>
+  <script src="game.js?v=14"></script>
 </body>
 </html>

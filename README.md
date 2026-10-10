@@ -13,7 +13,7 @@ Il est écrit en HTML, CSS et JavaScript, sans aucune dépendance.
 | Sauter  | Espace, ↑, Z ou W          | Bouton A      |
 | Entrer, boire, lire (sur l'île) | Espace ou Entrée | Bouton A |
 | Bouclier (une fois trouvé) | X                | Bouton B      |
-| Ravageuse (une fois trouvée, coûte une vie) | C | Bouton R      |
+| Ravageuse (une fois trouvée, coûte une vie) | C | Bouton R, à maintenir ½ s |
 | Pause   | P ou Échap                 |               |
 
 Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut lui sauter dessus.
