@@ -43,9 +43,9 @@ const WORLD = [
 const MISSIONS = [
   { name: 'Forêt brumeuse', level: 0, color: '#6abe30', theme: 'forest',
     unlock: 'La brume se dissipe au sud : le chemin du marais empoisonné est ouvert.' },
-  { name: 'Marais empoisonné', level: 1, color: '#9b5fc0',
+  { name: 'Marais empoisonné', level: 1, color: '#9b5fc0', theme: 'swamp',
     unlock: 'La brume se dissipe au nord : le volcan du Roi des slimes vous attend.' },
-  { name: 'Volcan', level: 2, color: '#df7126' },
+  { name: 'Volcan', level: 2, color: '#df7126', theme: 'volcano' },
 ];
 
 const INTRO = [
@@ -99,6 +99,7 @@ function enterWorld(pos) {
   game.state = 'world';
   game.view = 'world';
   overlay.hidden = true;
+  document.body.classList.remove('in-ending');
   particles = [];
   updateHud();
   writeSave();
@@ -107,6 +108,8 @@ function enterWorld(pos) {
 function startMission(i) {
   game.mission = i;
   game.levelIndex = MISSIONS[i].level;
+  game.checkpoint = null;
+  game.banner = null;
   game.view = 'level';
   input.jumpPressed = false;
   loadLevel(game.levelIndex);
@@ -118,12 +121,6 @@ function finishMission() {
   const i = game.mission;
   const firstTime = game.done <= i;
   game.done = Math.max(game.done, i + 1);
-  if (i === MISSIONS.length - 1) {
-    game.state = 'win';
-    clearSave();
-    showOverlay('Bravo !', `Le volcan est franchi. Le combat contre le Roi des slimes arrive bientôt…<br>Pièces : ${game.coins}<br>Espace ou toucher pour rejouer`);
-    return;
-  }
   enterWorld();
   if (firstTime && MISSIONS[i].unlock) game.messages.push(MISSIONS[i].unlock);
 }
