@@ -9,23 +9,30 @@ Il est écrit en HTML, CSS et JavaScript, sans aucune dépendance.
 
 | Action  | Clavier                    | Mobile        |
 |---------|----------------------------|---------------|
-| Bouger  | ← → ou Q / D (ou A / D)    | Boutons ◀ ▶  |
-| Sauter  | Espace, ↑, Z ou W          | Bouton ▲      |
+| Bouger  | Flèches ou Z Q S D (ou W A S D) | Croix ◀ ▲ ▼ ▶ |
+| Sauter  | Espace, ↑, Z ou W          | Bouton A      |
+| Entrer, boire, lire (sur l'île) | Espace ou Entrée | Bouton A |
 | Pause   | P ou Échap                 |               |
 
 Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut lui sauter dessus.
 
 ## Contenu
 
-- 3 niveaux, avec des pièces, des ennemis, des piques et un drapeau d'arrivée
-- 3 vies (en cas de mort, le niveau recommence)
-- Sauvegarde automatique du niveau atteint dans le navigateur (`localStorage`) : à la réouverture, on reprend au même niveau, ou on clique sur « Nouvelle partie » (touche N)
+- L'île de Brumelune, vue de dessus (style Pokémon) : on s'y déplace case par case et on entre
+  dans les missions. Les arbres passent devant le personnage (effet 2.5D).
+- 3 missions (forêt brumeuse, marais empoisonné, volcan) : chacune ouvre, dans la brume, le chemin de la suivante
+- La source de soin, au centre de l'île, redonne toutes les vies : c'est le seul endroit où se soigner
+- 3 vies (en cas de mort, la mission recommence ; sans vie, on se réveille près de la source)
+- Sauvegarde automatique dans le navigateur (`localStorage`) : missions terminées, vies, pièces et position
+  sur l'île. Pour recommencer, cliquer sur « Nouvelle partie » (touche N)
+- L'histoire et les règles prévues sont décrites dans `HISTOIRE.md`
 - Les sons sont générés en direct avec la Web Audio API (aucun fichier audio)
 
 ## Fichiers
 
 - `index.html` : la page, l'interface et les contrôles tactiles
 - `game.js` : le moteur (physique, collisions, ennemis, affichage)
+- `world.js` : l'île (carte modifiable à la main, légende en haut du fichier), les missions et les textes
 - `sprites.js` : le pixel art des décors, ennemis et pièces, dessiné sous forme de texte
 - `player.png` : la planche d'images du personnage (attente et marche)
 - `levels.js` : les cartes des niveaux, modifiables à la main (la légende est en haut du fichier)

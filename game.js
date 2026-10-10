@@ -40,14 +40,25 @@ const SAVE_KEY = 'petit-saut-sauvegarde';
 function loadSave() {
   try {
     const data = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (data && data.level > 0 && data.level < LEVELS.length) return data;
+    if (!data) return null;
+    // Ancienne sauvegarde ({ level, coins }) : les niveaux passés deviennent des missions terminées.
+    if (data.done === undefined && data.level > 0) {
+      return { done: Math.min(data.level, MISSIONS.length - 1), coins: data.coins || 0 };
+    }
+    if (data.done >= 0 && data.done < MISSIONS.length) return data;
   } catch (_) { /* stockage indisponible ou données invalides */ }
   return null;
 }
 
 function writeSave() {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ level: game.levelIndex, coins: game.coinsAtLevelStart }));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      done: game.done,
+      lives: game.lives,
+      coins: game.view === 'level' ? game.coinsAtLevelStart : game.coins,
+      x: world.x,
+      y: world.y,
+    }));
   } catch (_) { /* navigation privée, stockage plein… on continue sans sauvegarde */ }
 }
 
@@ -57,12 +68,14 @@ function clearSave() {
 
 /* ---------- Entrées clavier et tactiles ---------- */
 
-const input = { left: false, right: false, jump: false, jumpPressed: false };
+const input = { left: false, right: false, up: false, down: false, jump: false, jumpPressed: false };
 const KEYS = {
   ArrowLeft: 'left', KeyA: 'left', KeyQ: 'left',
   ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'jump', KeyW: 'jump', KeyZ: 'jump', Space: 'jump',
 };
+// Haut et bas ne servent que sur la carte de l'île (en mission, haut fait sauter).
+const VERTICAL_KEYS = { ArrowUp: 'up', KeyW: 'up', KeyZ: 'up', ArrowDown: 'down', KeyS: 'down' };
 
 function press(action, down) {
   if (action === 'jump' && down && !input.jump) input.jumpPressed = true;
@@ -72,6 +85,7 @@ function press(action, down) {
 addEventListener('keydown', e => {
   const action = KEYS[e.code];
   if (action) { e.preventDefault(); press(action, true); }
+  if (VERTICAL_KEYS[e.code]) { e.preventDefault(); press(VERTICAL_KEYS[e.code], true); }
   if (e.code === 'Space' || e.code === 'Enter') onConfirm();
   if (e.code === 'KeyP' || e.code === 'Escape') togglePause();
   if (e.code === 'KeyN' && !overlay.hidden && game.state !== 'pause') { clearSave(); startGame(); }
@@ -79,6 +93,7 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => {
   const action = KEYS[e.code];
   if (action) press(action, false);
+  if (VERTICAL_KEYS[e.code]) press(VERTICAL_KEYS[e.code], false);
 });
 
 document.querySelectorAll('[data-action]').forEach(btn => {
@@ -86,7 +101,8 @@ document.querySelectorAll('[data-action]').forEach(btn => {
   const set = down => e => {
     e.preventDefault();
     press(action, down);
-    if (down) onConfirm();
+    // Sur l'île, seul le bouton A agit (entrer, boire, lire) : les flèches servent à marcher.
+    if (down && (action === 'jump' || game.state !== 'world')) onConfirm();
   };
   btn.addEventListener('pointerdown', set(true));
   btn.addEventListener('pointerup', set(false));
@@ -145,7 +161,11 @@ function sfx(type) {
 /* ---------- État du jeu ---------- */
 
 const game = {
-  state: 'title', // title | play | pause | dying | clear | over | win
+  state: 'title', // title | world | play | pause | dying | clear | over | win
+  view: 'world', // ce qui est affiché : l'île (world) ou une mission (level)
+  paused: null, // état à retrouver en sortant de la pause
+  done: 0, // nombre de missions terminées
+  mission: 0,
   levelIndex: 0,
   lives: START_LIVES,
   coins: 0,
@@ -154,7 +174,7 @@ const game = {
   frame: 0,
 };
 
-let map, player, enemies, coins, flag, particles, camX, camY;
+let map, player, enemies, coins, flag, particles = [], camX = 0, camY = 0;
 
 function tileAt(tx, ty) {
   if (tx < 0 || tx >= map.w) return '#';
@@ -346,7 +366,9 @@ function update() {
   particles.forEach(pt => { pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.life--; });
   particles = particles.filter(pt => pt.life > 0);
 
-  if (game.state === 'play') {
+  if (game.state === 'world') {
+    updateWorld();
+  } else if (game.state === 'play') {
     updatePlayer();
     updateEnemies();
     updateCamera(false);
@@ -355,8 +377,14 @@ function update() {
     player.y += player.vy;
     if (--game.timer <= 0) {
       if (game.lives <= 0) {
+        // Plus de vies : Lyra se réveille près de la source, soignée, sans avoir fini la mission.
         game.state = 'over';
-        showMenu('Partie terminée');
+        game.lives = START_LIVES;
+        game.coins = game.coinsAtLevelStart;
+        placeOnWorld(world.start.x, world.start.y);
+        game.view = 'world';
+        writeSave();
+        showOverlay('Partie terminée', 'Lyra se réveille près de la source de soin.<br>Espace ou toucher pour continuer');
       } else {
         game.coins = game.coinsAtLevelStart;
         loadLevel(game.levelIndex);
@@ -365,17 +393,7 @@ function update() {
     }
   } else if (game.state === 'clear') {
     updateEnemies();
-    if (--game.timer <= 0) {
-      if (game.levelIndex + 1 < LEVELS.length) {
-        game.levelIndex++;
-        loadLevel(game.levelIndex);
-        game.state = 'play';
-      } else {
-        game.state = 'win';
-        clearSave();
-        showOverlay('Bravo !', `Tous les niveaux sont terminés.<br>Pièces : ${game.coins}<br>Espace ou toucher pour rejouer`);
-      }
-    }
+    if (--game.timer <= 0) finishMission();
   }
   input.jumpPressed = false;
 }
@@ -437,13 +455,13 @@ function drawSprite(img, x, y, flip) {
 }
 
 // Dessine une image de la planche du joueur, centrée sur (cx) et posée sur (bottom).
-function drawPlayer(index, cx, bottom, flip) {
+function drawPlayer(index, cx, bottom, flip, scale = 0.5) {
   if (!playerSheet.complete || !playerSheet.naturalWidth) return;
-  const w = PLAYER_FRAME_W, h = PLAYER_FRAME_H;
-  const x = Math.round(cx - camX - w / 4), y = Math.round(bottom - camY - h / 2);
+  const w = PLAYER_FRAME_W * scale, h = PLAYER_FRAME_H * scale;
+  const x = Math.round(cx - camX - w / 2), y = Math.round(bottom - camY - h);
   ctx.save();
-  if (flip) { ctx.translate(x + w / 2, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
-  ctx.drawImage(playerSheet, index * w, 0, w, h, 0, 0, w / 2, h / 2);
+  if (flip) { ctx.translate(x + w, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
+  ctx.drawImage(playerSheet, index * PLAYER_FRAME_W, 0, PLAYER_FRAME_W, PLAYER_FRAME_H, 0, 0, w, h);
   ctx.restore();
 }
 
@@ -465,6 +483,7 @@ function drawFlag() {
 }
 
 function draw() {
+  if (game.view === 'world') return drawWorld();
   drawBackground();
   drawTiles();
   drawFlag();
@@ -484,7 +503,7 @@ function draw() {
     drawSprite(img, en.x - 2, en.y - 7, en.vx > 0);
   });
 
-  if (game.state !== 'title') {
+  {
     const p = player;
     let anim = 'idle', t = game.frame / 6;
     if (game.state === 'dying' || !p.onGround) anim = 'jump';
@@ -504,7 +523,8 @@ function draw() {
 function updateHud() {
   hud.lives.textContent = '♥'.repeat(Math.max(0, game.lives));
   hud.coins.textContent = game.coins;
-  hud.level.textContent = `${game.levelIndex + 1}/${LEVELS.length}`;
+  document.body.classList.toggle('on-world', game.view === 'world');
+  hud.level.textContent = game.view === 'world' ? 'Brumelune' : MISSIONS[game.mission].name;
 }
 
 function showOverlay(title, text, canRestart = false) {
@@ -514,11 +534,12 @@ function showOverlay(title, text, canRestart = false) {
   overlay.hidden = false;
 }
 
-// Écran d'accueil ou de fin de partie : propose de reprendre au niveau sauvegardé.
+// Écran d'accueil : propose de reprendre la partie sauvegardée.
 function showMenu(title) {
   const save = loadSave();
   if (save) {
-    showOverlay(title, `Espace ou toucher pour continuer au niveau ${save.level + 1}`, true);
+    const count = save.done > 1 ? `${save.done} missions terminées` : `${save.done} mission terminée`;
+    showOverlay(title, `Espace ou toucher pour continuer (${count})`, true);
   } else {
     showOverlay(title, `Espace ou toucher pour jouer`);
   }
@@ -526,25 +547,29 @@ function showMenu(title) {
 
 function startGame() {
   const save = loadSave();
-  game.levelIndex = save ? save.level : 0;
-  game.lives = START_LIVES;
+  game.done = save ? save.done : 0;
+  game.lives = save && save.lives > 0 ? save.lives : START_LIVES;
   game.coins = save ? save.coins : 0;
-  loadLevel(game.levelIndex);
-  game.state = 'play';
-  overlay.hidden = true;
+  world.messages = [];
+  const pos = save && worldCanWalk(save.x, save.y) ? save : world.start;
+  enterWorld(pos);
+  if (!save) showMessages(INTRO);
 }
 
 function onConfirm() {
-  if (game.state === 'title' || game.state === 'over' || game.state === 'win') startGame();
+  if (game.state === 'title' || game.state === 'win') startGame();
+  else if (game.state === 'over') enterWorld();
   else if (game.state === 'pause') togglePause();
+  else if (game.state === 'world') worldConfirm();
 }
 
 function togglePause() {
-  if (game.state === 'play') {
+  if (game.state === 'play' || game.state === 'world') {
+    game.paused = game.state;
     game.state = 'pause';
     showOverlay('Pause', 'P ou Échap pour reprendre');
   } else if (game.state === 'pause') {
-    game.state = 'play';
+    game.state = game.paused;
     overlay.hidden = true;
   }
 }
@@ -563,13 +588,14 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// Le niveau sauvegardé (ou le niveau 1) sert de décor derrière l'écran d'accueil,
-// pour que le numéro affiché corresponde à celui où l'on reprend.
+// L'île, à l'endroit sauvegardé, sert de décor derrière l'écran d'accueil.
 const initialSave = loadSave();
 if (initialSave) {
-  game.levelIndex = initialSave.level;
-  game.coins = initialSave.coins;
+  game.done = initialSave.done;
+  if (initialSave.lives > 0) game.lives = initialSave.lives;
 }
-loadLevel(game.levelIndex, false);
+const initialPos = initialSave && worldCanWalk(initialSave.x, initialSave.y) ? initialSave : world.start;
+placeOnWorld(initialPos.x, initialPos.y);
+updateHud();
 showMenu('Petit Saut');
 requestAnimationFrame(loop);

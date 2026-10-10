@@ -113,7 +113,20 @@
       font-size: 24px;
       touch-action: none;
     }
-    #touch .dpad { display: flex; gap: 16px; }
+    #touch .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 64px);
+      grid-template-areas: ". up ." "left down right";
+      gap: 8px;
+    }
+    #touch [data-action="up"] { grid-area: up; }
+    #touch [data-action="down"] { grid-area: down; }
+    #touch [data-action="left"] { grid-area: left; }
+    #touch [data-action="right"] { grid-area: right; }
+    #touch .action { align-self: flex-end; font-family: inherit; font-size: 20px; }
+    /* Haut et bas ne servent que sur la carte de l'île. */
+    body:not(.on-world) #touch [data-action="up"],
+    body:not(.on-world) #touch [data-action="down"] { visibility: hidden; }
     @media (pointer: coarse) {
       #touch { display: flex; }
       .controls .keys { display: none; }
@@ -128,7 +141,7 @@
     <canvas id="game" width="640" height="360"></canvas>
     <div id="hud">
       <span id="lives"></span>
-      <span>Niveau <span id="level"></span></span>
+      <span id="level"></span>
       <span id="coins"></span>
     </div>
     <div id="overlay">
@@ -136,7 +149,7 @@
       <p id="overlay-text"></p>
       <button id="new-game" hidden>Nouvelle partie</button>
       <p class="controls">
-        <span class="keys">← → ou Q / D : bouger · Espace, ↑ ou Z : sauter · P : pause</span>
+        <span class="keys">Flèches ou ZQSD : bouger · Espace : sauter, entrer, parler · P : pause</span>
         <span class="tap">Boutons en bas de l'écran</span>
       </p>
     </div>
@@ -144,10 +157,12 @@
 
   <div id="touch">
     <div class="dpad">
+      <button data-action="up" aria-label="Haut">▲</button>
       <button data-action="left" aria-label="Gauche">◀</button>
+      <button data-action="down" aria-label="Bas">▼</button>
       <button data-action="right" aria-label="Droite">▶</button>
     </div>
-    <button data-action="jump" aria-label="Sauter">▲</button>
+    <button class="action" data-action="jump" aria-label="Sauter ou agir">A</button>
   </div>
 
   <!-- Affiche les erreurs à l'écran : utile pour comprendre un problème sur téléphone. -->
@@ -160,8 +175,9 @@
     });
   </script>
   <!-- Le paramètre ?v= force le navigateur à recharger les scripts après chaque mise à jour. -->
-  <script src="sprites.js?v=9"></script>
-  <script src="levels.js?v=9"></script>
-  <script src="game.js?v=9"></script>
+  <script src="sprites.js?v=10"></script>
+  <script src="levels.js?v=10"></script>
+  <script src="world.js?v=10"></script>
+  <script src="game.js?v=10"></script>
 </body>
 </html>

@@ -92,7 +92,7 @@ Le Roi est libéré et la magie revient, mais la magicienne a donné ses derniè
 Dernière scène : sous un ciel enfin dégagé, les villageois et les slimes se rassemblent pour
 **l'enterrement de la magicienne**, qui s'est sacrifiée pour le peuple de l'île.
 
-## La carte de l'île (à faire)
+## La carte de l'île (faite, voir `world.js`)
 
 - Vue de dessus, style Pokémon, déplacement case par case dans les 4 directions.
 - Carte écrite en texte, comme les niveaux (légende à définir dans `world.js`).
