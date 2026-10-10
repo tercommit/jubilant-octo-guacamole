@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="La Gardienne">
+  <title>La Gardienne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0a14;
+      --text: #ffffff;
+      --muted: #9badb7;
+      --fire: #df7126;
+      --gold: #fbf236;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    #start {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: min(16px, 2.6vh);
+      padding: 16px;
+      overflow-y: auto;
+      text-align: center;
+      background: rgba(12, 10, 20, 0.78);
+      font-size: clamp(8px, min(2.4vw, 3vh), 14px);
+      line-height: 1.9;
+    }
+    #start[hidden] { display: none; }
+    #start h1 { margin: 0; color: var(--fire); font-size: 2em; text-shadow: 3px 3px 0 #45283c; }
+    #start p { margin: 0; max-width: 34em; }
+    #start .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    button {
+      font: inherit;
+      color: var(--bg);
+      background: var(--gold);
+      border: 0;
+      box-shadow: 3px 3px 0 var(--fire);
+      padding: 1em 1.5em;
+      cursor: pointer;
+    }
+    button[hidden] { display: none; }
+    button.small { font-size: 0.75em; padding: 0.8em 1em; }
+    button.off { background: var(--muted); box-shadow: 3px 3px 0 #45283c; }
+    #start a { color: var(--muted); font-size: 0.75em; }
+    .hint { color: var(--muted); font-size: 0.75em; }
+  </style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="start">
+    <h1>La Gardienne</h1>
+    <p>On lui a pris son cerf blanc. Sa rage brûle, et sa magie ne lui obéit plus.</p>
+    <div class="row">
+      <button id="continue" hidden>Continuer</button>
+      <button id="new">Commencer</button>
+    </div>
+    <p class="hint">Touche l'écran n'importe où pour lancer, penche le téléphone pour courber le feu.<br>Appui long n'importe où : recalibrer. Meilleur à l'horizontale.</p>
+    <div class="row">
+      <button class="small off" data-axis="x">Inverser G/D</button>
+      <button class="small off" data-axis="y">Inverser H/B</button>
+      <button class="small" id="music">Musique : oui</button>
+    </div>
+    <p><a href="../../">Toutes les versions</a> · <a href="test-gyro/">Test du gyroscope</a></p>
+  </div>
+
+  <!-- Affiche les erreurs à l'écran : utile pour comprendre un problème sur téléphone. -->
+  <script>
+    window.addEventListener('error', function (e) {
+      var box = document.getElementById('error') || document.body.appendChild(document.createElement('pre'));
+      box.id = 'error';
+      box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;margin:0;padding:8px;background:#fff;color:#c00;font:12px monospace;white-space:pre-wrap;z-index:9';
+      box.textContent += 'Erreur : ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')\n';
+    });
+  </script>
+  <script src="js/tilt.js?v=3"></script>
+  <script src="js/assets.js?v=3"></script>
+  <script src="js/zones.js?v=3"></script>
+  <script src="js/game.js?v=3"></script>
+</body>
+</html>

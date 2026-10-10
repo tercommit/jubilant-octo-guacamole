@@ -3,9 +3,9 @@
 Un mini jeu de plate-forme 2D en pixel art, jouable dans le navigateur.
 Il est écrit en HTML, CSS et JavaScript, sans aucune dépendance.
 
-**Jouer :** https://tercommit.github.io/jubilant-octo-guacamole/archive/
+**Jouer :** https://tercommit.github.io/jubilant-octo-guacamole/archives/v1/
 
-> Projet archivé : il est conservé tel quel dans ce dossier, et reste jouable.
+> Version archivée (V1) : conservée telle quelle dans ce dossier, et toujours jouable.
 
 ## Commandes
 
@@ -55,7 +55,7 @@ Settings → Pages → *Deploy from a branch* → branche `main`, dossier `/ (ro
 ## Licence
 
 Le code, les niveaux et les graphismes de `sprites.js` sont placés dans le domaine public sous
-[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `../LICENSE`.
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `../../LICENSE`.
 
 **Exception :** le personnage (`player.png`) n'est pas couvert par CC0. Il est tiré du pack
 « sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retourné pour regarder vers la droite.

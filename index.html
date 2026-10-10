@@ -2,103 +2,111 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="La Gardienne">
-  <title>La Gardienne</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Toutes les versions</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0c0a14;
-      --text: #ffffff;
-      --muted: #9badb7;
-      --fire: #df7126;
+      --bg: #15121f;
+      --card: #231d33;
+      --text: #f2eee6;
+      --muted: #bdb6c9;
       --gold: #fbf236;
+      --fire: #df7126;
     }
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.5;
+      padding: max(24px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 {
       font-family: 'Press Start 2P', monospace;
+      font-size: clamp(18px, 5vw, 28px);
+      line-height: 1.5;
+      color: var(--gold);
+      margin: 8px 0 8px;
+    }
+    .intro { color: var(--muted); margin: 0 0 28px; }
+    .version {
+      display: block;
+      background: var(--card);
+      border-radius: 16px;
       overflow: hidden;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
+      margin-bottom: 24px;
+      color: inherit;
+      text-decoration: none;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
     }
-    canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-    #start {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: min(16px, 2.6vh);
-      padding: 16px;
-      overflow-y: auto;
-      text-align: center;
-      background: rgba(12, 10, 20, 0.78);
-      font-size: clamp(8px, min(2.4vw, 3vh), 14px);
-      line-height: 1.9;
+    .version img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; image-rendering: pixelated; }
+    .body { padding: 18px 20px 20px; }
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tag {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #3a3350;
     }
-    #start[hidden] { display: none; }
-    #start h1 { margin: 0; color: var(--fire); font-size: 2em; text-shadow: 3px 3px 0 #45283c; }
-    #start p { margin: 0; max-width: 34em; }
-    #start .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-    button {
-      font: inherit;
-      color: var(--bg);
+    .tag.num { background: var(--fire); color: #15121f; }
+    h2 { margin: 0 0 6px; font-size: 22px; }
+    .body p { margin: 0 0 6px; color: var(--muted); }
+    .play {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: #15121f;
       background: var(--gold);
-      border: 0;
-      box-shadow: 3px 3px 0 var(--fire);
-      padding: 1em 1.5em;
-      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 8px;
     }
-    button[hidden] { display: none; }
-    button.small { font-size: 0.75em; padding: 0.8em 1em; }
-    button.off { background: var(--muted); box-shadow: 3px 3px 0 #45283c; }
-    #start a { color: var(--muted); font-size: 0.75em; }
-    .hint { color: var(--muted); font-size: 0.75em; }
+    .extra { margin: -12px 0 24px 4px; font-size: 15px; }
+    .extra a { color: var(--muted); }
+    .next {
+      border: 2px dashed #3a3350;
+      border-radius: 16px;
+      padding: 18px 20px;
+      color: var(--muted);
+    }
+    .next h2 { color: var(--text); }
   </style>
 </head>
 <body>
-  <canvas id="scene"></canvas>
+  <main>
+    <h1>Toutes les versions</h1>
+    <p class="intro">Chaque version du jeu est conservée et reste jouable. La plus récente est en haut.</p>
 
-  <div id="start">
-    <h1>La Gardienne</h1>
-    <p>On lui a pris son cerf blanc. Sa rage brûle, et sa magie ne lui obéit plus.</p>
-    <div class="row">
-      <button id="continue" hidden>Continuer</button>
-      <button id="new">Commencer</button>
+    <div class="next">
+      <h2>V3 · à venir</h2>
+      <p>La prochaine idée de jeu viendra ici.</p>
     </div>
-    <p class="hint">Touche l'écran n'importe où pour lancer, penche le téléphone pour courber le feu.<br>Appui long n'importe où : recalibrer. Meilleur à l'horizontale.</p>
-    <div class="row">
-      <button class="small off" data-axis="x">Inverser G/D</button>
-      <button class="small off" data-axis="y">Inverser H/B</button>
-      <button class="small" id="music">Musique : oui</button>
-    </div>
-    <p><a href="test-gyro/">Test du gyroscope</a> · <a href="archive/">Ancien jeu : Petit Saut</a></p>
-  </div>
+    <br>
 
-  <!-- Affiche les erreurs à l'écran : utile pour comprendre un problème sur téléphone. -->
-  <script>
-    window.addEventListener('error', function (e) {
-      var box = document.getElementById('error') || document.body.appendChild(document.createElement('pre'));
-      box.id = 'error';
-      box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;margin:0;padding:8px;background:#fff;color:#c00;font:12px monospace;white-space:pre-wrap;z-index:9';
-      box.textContent += 'Erreur : ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')\n';
-    });
-  </script>
-  <script src="js/tilt.js?v=3"></script>
-  <script src="js/assets.js?v=3"></script>
-  <script src="js/zones.js?v=3"></script>
-  <script src="js/game.js?v=3"></script>
+    <a class="version" href="archives/v2/">
+      <img src="archives/v2/apercu.jpg" alt="La Gardienne : une boule de feu dans la forêt au crépuscule">
+      <div class="body">
+        <div class="tags"><span class="tag num">V2</span><span class="tag">Archivée</span><span class="tag">Gyroscope</span></div>
+        <h2>La Gardienne</h2>
+        <p>On lance une boule de feu et on courbe sa trajectoire en penchant le téléphone, pour brûler les traces du chasseur qui a tué le cerf blanc. Trois zones.</p>
+        <p>Mise de côté : le contrôle au gyroscope s'est révélé peu pratique.</p>
+        <span class="play">Jouer</span>
+      </div>
+    </a>
+    <p class="extra"><a href="archives/v2/test-gyro/">Page de test du gyroscope</a></p>
+
+    <a class="version" href="archives/v1/">
+      <img src="archives/v1/apercu.jpg" alt="Petit Saut : l'île de Brumelune vue de dessus, avec la source de soin">
+      <div class="body">
+        <div class="tags"><span class="tag num">V1</span><span class="tag">Archivée</span><span class="tag">Plate-forme</span></div>
+        <h2>Petit Saut</h2>
+        <p>Jeu de plate-forme en pixel art : l'île de Brumelune, trois missions, le bouclier, la ravageuse et le combat contre le Roi des slimes, avec deux fins.</p>
+        <span class="play">Jouer</span>
+      </div>
+    </a>
+  </main>
 </body>
 </html>
