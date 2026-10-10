@@ -1,40 +1,42 @@
-# Brumelune : la traversée
+# La Gardienne
 
-Nouveau projet de jeu contemplatif, jouable dans le navigateur, qui se contrôle en **inclinant le
-téléphone** (gyroscope). Il reprend l'univers et la magicienne de l'ancien jeu.
+Jeu web 2D jouable dans le navigateur. On lance des boules de feu, puis on courbe leur trajectoire
+en **inclinant le téléphone** (gyroscope). L'histoire et les règles sont dans `HISTOIRE.md`.
 
-**Page actuelle :** https://tercommit.github.io/jubilant-octo-guacamole/
+**Jouer :** https://tercommit.github.io/jubilant-octo-guacamole/
 
-Pour l'instant, la page est un **test du gyroscope** : on y vérifie l'autorisation, la réception
-des mesures et la calibration, et on guide Lyra pour attraper des lucioles.
-
-## Le test du gyroscope
+## Comment jouer
 
 1. Toucher **Commencer**. Sur iPhone, Safari demande l'accès aux mouvements : accepter.
-2. Garder le téléphone immobile pendant la calibration : la position où l'on tient le téléphone
-   devient la position neutre (assis, allongé, peu importe).
-3. Pencher le téléphone : Lyra glisse dans ce sens, comme une bille.
+2. Tenir le téléphone comme on est bien installé, sans bouger : c'est la calibration.
+3. **Toucher l'écran n'importe où** pour lancer une boule de feu.
+4. **Pencher le téléphone** pendant qu'elle vole : elle accélère dans ce sens. Elle a de
+   l'inertie, et tremble un peu : c'est la rage de la gardienne.
+5. Brûler toutes les cibles de la zone avec un nombre de tirs limité. Une boule traverse les
+   cibles : une bonne courbe peut en brûler plusieurs. Les troncs l'éteignent.
 
-Le panneau **Infos** affiche quatre voyants (autorisation, mesures par seconde, calibration,
-inclinaison), les angles bruts et la position neutre. Le niveau à bulle, en bas à droite, montre
-l'inclinaison.
+- **Appui long** (1 s) n'importe où : recalibrer.
+- **Inverser G/D, Inverser H/B** (écran d'accueil) : si un axe part dans le mauvais sens.
+- **Sans gyroscope** : glisser le doigt pour courber la boule, ou flèches et Espace au clavier.
+- La progression (zone atteinte) est sauvegardée dans le navigateur.
 
-- **Recalibrer** : bouton, appui long d'une seconde n'importe où sur la scène, ou touche C.
-- **Inverser G/D, Inverser H/B** : au cas où un axe partirait dans le mauvais sens sur un appareil.
-- **Sans gyroscope** (accès refusé, ordinateur) : glisser le doigt n'importe où, ou flèches du clavier.
-- Si l'accès a été refusé sur iPhone : Réglages › Safari › Avancé › Données des sites web,
-  supprimer celles du site, puis recharger la page.
+## Contenu actuel
 
-Le jeu calcule la direction de la gravité vue depuis l'écran plutôt que d'utiliser les angles
-bruts : il n'y a pas de saut quand on tient le téléphone presque à la verticale, et la
-rotation portrait/paysage est prise en compte.
+1. **La lisière** : cibles fixes à découvert, pour apprendre à doser.
+2. **Le sous-bois** : troncs et branche à contourner.
+3. **La forêt profonde** : corbeaux corrompus qui bougent.
+
+À venir : le cœur corrompu (vents magiques, contrôles inversés), puis le chasseur et l'entité.
 
 ## Fichiers
 
-- `index.html` : la page de test (tout le code est dans le fichier)
-- `player.png` : la planche d'images de la magicienne
-- `archive/` : l'ancien jeu, **Petit Saut** (plate-forme, île de Brumelune, Roi des slimes),
-  conservé tel quel et toujours jouable sur https://tercommit.github.io/jubilant-octo-guacamole/archive/
+- `index.html` : la page et l'écran d'accueil
+- `js/tilt.js` : lecture du gyroscope et calibration
+- `js/zones.js` : les zones (cibles, obstacles, couleurs) et les textes de l'histoire
+- `js/game.js` : le jeu (boule de feu, collisions, affichage)
+- `player.png` : la gardienne (planche d'images de la magicienne)
+- `test-gyro/` : la page de test du gyroscope
+- `archive/` : l'ancien jeu, **Petit Saut**, conservé tel quel et toujours jouable
 
 ## Publier avec GitHub Pages
 
@@ -45,6 +47,6 @@ Settings → Pages → *Deploy from a branch* → branche `main`, dossier `/ (ro
 Le code est placé dans le domaine public sous
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `LICENSE`.
 
-**Exception :** la magicienne (`player.png`) n'est pas couverte par CC0. Elle est tirée du pack
+**Exception :** la gardienne (`player.png`) n'est pas couverte par CC0. Elle est tirée du pack
 « sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retournée pour
 regarder vers la droite. Elle reste soumise à la licence choisie par son auteur ou autrice.
