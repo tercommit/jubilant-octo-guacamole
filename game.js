@@ -936,7 +936,9 @@ function startGame() {
   game.done = save ? save.done : 0;
   game.lives = save && save.lives > 0 ? save.lives : START_LIVES;
   game.coins = save ? save.coins : 0;
-  game.powers = Object.assign({ shield: false, ravage: false }, save && save.powers);
+  // Les pouvoirs des missions déjà terminées sont acquis, même si la sauvegarde ne les mentionne pas.
+  const saved = (save && save.powers) || {};
+  game.powers = { shield: !!saved.shield || game.done >= 1, ravage: !!saved.ravage || game.done >= 2 };
   game.messages = [];
   const pos = save && worldCanWalk(save.x, save.y) ? save : world.start;
   enterWorld(pos);

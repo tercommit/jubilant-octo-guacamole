@@ -77,6 +77,8 @@ world.rows.forEach((row, y) => row.forEach((t, x) => {
 }));
 
 function worldTile(x, y) {
+  // Une position absente ou invalide (ancienne sauvegarde sans position) compte comme de la mer.
+  if (!Number.isInteger(x) || !Number.isInteger(y)) return '~';
   return x < 0 || y < 0 || x >= world.w || y >= world.h ? '~' : world.rows[y][x];
 }
 
