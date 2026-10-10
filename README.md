@@ -22,9 +22,12 @@ en **inclinant le téléphone** (gyroscope). L'histoire et les règles sont dans
 
 ## Contenu actuel
 
-1. **La lisière** : cibles fixes à découvert, pour apprendre à doser.
+1. **La lisière** : cristaux et piège à découvert, pour apprendre à doser. Fond : un travelling animé à travers la forêt au crépuscule.
 2. **Le sous-bois** : troncs et branche à contourner.
-3. **La forêt profonde** : corbeaux corrompus qui bougent.
+3. **La forêt profonde** : chauves-souris et bête d'ombre qui bougent.
+
+Graphismes, bruitages et musique d'ambiance viennent de ressources libres (CC0), listées dans
+`assets/CREDITS.md`. La musique se coupe depuis l'écran d'accueil (bouton **Musique**) ou avec la touche M.
 
 À venir : le cœur corrompu (vents magiques, contrôles inversés), puis le chasseur et l'entité.
 
@@ -33,7 +36,9 @@ en **inclinant le téléphone** (gyroscope). L'histoire et les règles sont dans
 - `index.html` : la page et l'écran d'accueil
 - `js/tilt.js` : lecture du gyroscope et calibration
 - `js/zones.js` : les zones (cibles, obstacles, couleurs) et les textes de l'histoire
+- `js/assets.js` : chargement des images et des sons
 - `js/game.js` : le jeu (boule de feu, collisions, affichage)
+- `assets/` : images, sons et musique, avec leurs crédits dans `assets/CREDITS.md`
 - `player.png` : la gardienne (planche d'images de la magicienne)
 - `test-gyro/` : la page de test du gyroscope
 - `archive/` : l'ancien jeu, **Petit Saut**, conservé tel quel et toujours jouable
@@ -46,6 +51,8 @@ Settings → Pages → *Deploy from a branch* → branche `main`, dossier `/ (ro
 
 Le code est placé dans le domaine public sous
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `LICENSE`.
+
+Les ressources de `assets/` sont aussi en CC0, par leurs auteurs respectifs (voir `assets/CREDITS.md`).
 
 **Exception :** la gardienne (`player.png`) n'est pas couverte par CC0. Elle est tirée du pack
 « sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retournée pour

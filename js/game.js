@@ -31,11 +31,13 @@ function tone(type, from, to, dur, vol = 0.08) {
   osc.start(t);
   osc.stop(t + dur);
 }
+// Les vrais sons (assets/audio) ; si l'un d'eux n'est pas prêt, un son généré le remplace.
+const HIT_SOUNDS = { totem: 'hit-crystal', trap: 'hit-trap', bat: 'hit-bat', beast: 'hit-beast' };
 const sfx = {
-  launch: () => tone('sawtooth', 180, 60, 0.35, 0.06),
-  hit: () => { tone('square', 300, 900, 0.15, 0.05); tone('triangle', 120, 40, 0.4, 0.08); },
-  fizzle: () => tone('triangle', 400, 80, 0.3, 0.05),
-  clear: () => [392, 523, 659].forEach((f, i) => setTimeout(() => tone('sine', f, f, 0.6, 0.06), i * 140)),
+  launch: () => Sound.play('launch', 0.6) || tone('sawtooth', 180, 60, 0.35, 0.06),
+  hit: type => Sound.play(HIT_SOUNDS[type] || 'hit-crystal', 0.8) || (tone('square', 300, 900, 0.15, 0.05), tone('triangle', 120, 40, 0.4, 0.08)),
+  fizzle: wood => Sound.play(wood ? 'fizzle-wood' : 'fizzle', 0.7) || tone('triangle', 400, 80, 0.3, 0.05),
+  clear: () => Sound.play('clear', 0.8) || [392, 523, 659].forEach((f, i) => setTimeout(() => tone('sine', f, f, 0.6, 0.06), i * 140)),
 };
 
 /* ---------- État ---------- */
@@ -47,6 +49,7 @@ const game = {
   targets: [],
   ball: null,
   sparks: [],
+  effects: [],     // explosions animées
   texts: [],       // pages à lire : { text, stag?, then? }
   time: 0,
   flash: 0,
@@ -101,12 +104,18 @@ function launch() {
 
 function endBall(x, y) {
   burst(x, y, '#df7126', 16, 70);
+  explode(x, y, 'puff');
   game.ball = null;
   if (game.shots <= 0) {
     showTexts(['Ta rage ne suffit pas encore. Respire… et recommence.'], () => startZone(game.zone));
   } else {
     game.state = 'aim';
   }
+}
+
+// Explosion animée (sprite) : 'explosion' sur une cible, 'puff' quand la boule s'éteint.
+function explode(x, y, kind) {
+  game.effects.push({ x, y, kind, t: 0 });
 }
 
 function burst(x, y, color, n, speed) {
@@ -163,6 +172,7 @@ addEventListener('keydown', e => {
   if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
   if ((e.code === 'Space' || e.code === 'Enter') && !e.repeat && game.state !== 'title') { e.preventDefault(); onTap(); }
   if (e.code === 'KeyC' && Tilt.state.mode === 'gyro' && (game.state === 'aim')) runCalibration(() => { game.state = 'aim'; });
+  if (e.code === 'KeyM') syncMusicButton(Sound.toggleMusic());
 });
 addEventListener('keyup', e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
 addEventListener('gesturestart', e => e.preventDefault());
@@ -178,9 +188,16 @@ function update(dt) {
   game.shake = Math.max(0, game.shake - dt);
 
   for (const t of game.targets) {
-    if (t.type === 'crow') {
+    if (t.type === 'bat') {
+      const px = t.x;
       t.x = t.bx + Math.sin(game.time * t.speed + t.phase) * (t.ax || 0);
       t.y = t.by + Math.cos(game.time * t.speed * 1.3 + t.phase) * (t.ay || 0);
+      if (Math.abs(t.x - px) > 0.01) t.dir = Math.sign(t.x - px);
+    } else if (t.type === 'beast') {
+      // La bête d'ombre court au sol, d'un bout à l'autre de son territoire.
+      const px = t.x;
+      t.x = t.bx + Math.sin(game.time * t.speed + t.phase) * t.ax;
+      if (Math.abs(t.x - px) > 0.01) t.dir = Math.sign(t.x - px);
     }
     if (t.dead) t.dead += dt;
   }
@@ -204,17 +221,19 @@ function update(dt) {
 
     // La boule est si puissante qu'elle traverse les cibles : une bonne courbe en brûle plusieurs.
     for (const t of game.targets) {
-      if (!t.dead && Math.hypot(b.x - t.x, b.y - t.y) < 13) {
+      if (!t.dead && Math.hypot(b.x - t.x, b.y - t.y) < (t.type === 'beast' ? 16 : 13)) {
         t.dead = 0.001;
         game.shake = 0.2;
-        sfx.hit();
-        burst(t.x, t.y, t.type === 'crow' ? '#76428a' : '#9b5fc0', 22, 90);
+        sfx.hit(t.type);
+        explode(t.x, t.y, 'explosion');
+        burst(t.x, t.y, t.type === 'bat' || t.type === 'beast' ? '#76428a' : '#9b5fc0', 22, 90);
         burst(t.x, t.y, '#fbf236', 10, 60);
       }
     }
     // Dernière cible brûlée : la boule explose tout de suite et la zone est purifiée.
     if (!game.targets.some(t => !t.dead)) {
       burst(b.x, b.y, '#fbf236', 40, 120);
+      explode(b.x, b.y, 'explosion');
       game.ball = null;
       game.state = 'cleared';
       game.clearTimer = CLEAR_DELAY;
@@ -224,7 +243,7 @@ function update(dt) {
     const blocked = game.zoneObstacles().some(o => hitsRect(b.x, b.y, 4, o));
     const out = b.x < -30 || b.x > VIEW_W + 30 || b.y < -60 || b.y > GROUND - 3;
     if (blocked || out || b.life <= 0) {
-      if (blocked || b.y > GROUND - 3) sfx.fizzle();
+      if (blocked || b.y > GROUND - 3) sfx.fizzle(blocked);
       endBall(Math.max(0, Math.min(VIEW_W, b.x)), Math.min(GROUND - 3, b.y));
     }
   }
@@ -236,6 +255,9 @@ function update(dt) {
       startZone(game.zone + 1);
     });
   }
+
+  game.effects.forEach(e => { e.t += dt; });
+  game.effects = game.effects.filter(e => e.t < 0.45);
 
   game.sparks.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt; p.life -= dt; });
   game.sparks = game.sparks.filter(p => p.life > 0);
@@ -283,34 +305,42 @@ function treeLine(seed, base, height, color, parallax) {
   }
 }
 
+// Version rougie et assombrie du cerf, pour la page « Il a tué le cerf blanc ».
+let deadDeer = null;
+function deadDeerFrame() {
+  if (deadDeer || !ready(ART.deerIdle)) return deadDeer;
+  deadDeer = document.createElement('canvas');
+  deadDeer.width = 72;
+  deadDeer.height = 52;
+  const g = deadDeer.getContext('2d');
+  g.drawImage(ART.deerIdle, 0, 0, 72, 52, 0, 0, 72, 52);
+  g.globalCompositeOperation = 'source-atop';
+  g.fillStyle = 'rgba(120,20,30,0.55)';
+  g.fillRect(0, 0, 72, 52);
+  return deadDeer;
+}
+
 function drawStag(x, y, lying) {
-  // Le cerf blanc, en pixel art simple (cases de 3 px), avec un halo : blanc debout, rouge couché.
-  const P = 3;
-  const g = ctx.createRadialGradient(x + 27, y + 24, 2, x + 27, y + 24, 55);
-  g.addColorStop(0, lying ? 'rgba(217,87,99,0.3)' : 'rgba(255,255,255,0.25)');
+  // Le cerf blanc : debout et vivant, ou rougi et qui s'efface.
+  const g = ctx.createRadialGradient(x + 54, y + 40, 4, x + 54, y + 40, 70);
+  g.addColorStop(0, lying ? 'rgba(217,87,99,0.35)' : 'rgba(255,255,255,0.25)');
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
-  ctx.fillRect(x - 30, y - 30, 120, 110);
-  const px = (a, b, w = 1, h = 1) => ctx.fillRect(x + a * P, y + b * P, w * P, h * P);
-  ctx.fillStyle = '#f2f2f2';
+  ctx.fillRect(x - 20, y - 30, 150, 140);
+  if (!ready(ART.deerIdle)) return;
   if (!lying) {
-    px(2, 0); px(6, 0); px(2, 1, 1, 2); px(4, 1); px(6, 1, 1, 2); px(3, 2, 3, 1); // bois
-    px(3, 3, 3, 3); px(2, 5, 2, 1);                                                // tête
-    px(5, 6, 12, 4); px(4, 6, 2, 2); px(17, 6);                                    // corps et queue
-    px(6, 10, 1, 4); px(8, 10, 1, 4); px(14, 10, 1, 4); px(16, 10, 1, 4);          // pattes
-    ctx.fillStyle = '#222034';
-    px(4, 4);
-  } else {
-    // Couché sur le flanc, la tête posée au sol, les bois couchés vers l'arrière.
-    px(5, 9, 12, 4); px(17, 9);                                                    // corps
-    px(1, 11, 4, 2); px(0, 12);                                                    // tête au sol
-    px(1, 9); px(2, 8); px(3, 9); px(0, 8); px(3, 7);                              // bois
-    px(7, 13, 4, 1); px(13, 13, 4, 1);                                             // pattes repliées
-    ctx.fillStyle = '#222034';
-    px(2, 11);
-    ctx.fillStyle = '#d95763';
-    px(9, 10, 2, 1);                                                               // la blessure
-    px(10, 13, 3, 1);
+    drawFrame(ART.deerIdle, Math.floor(game.time * 7), 72, 52, x, y, 108, 78);
+    return;
+  }
+  const img = deadDeerFrame();
+  ctx.globalAlpha = 0.45 + 0.2 * Math.sin(game.time * 1.5);
+  if (img) ctx.drawImage(img, x, y + 6, 108, 78);
+  ctx.globalAlpha = 1;
+  // Sa magie s'échappe en petites lueurs qui montent.
+  for (let i = 0; i < 6; i++) {
+    const k = (game.time * 0.4 + i / 6) % 1;
+    ctx.fillStyle = `rgba(255,220,220,${0.6 * (1 - k)})`;
+    ctx.fillRect(x + 20 + i * 14, y + 60 - k * 70, 2, 2);
   }
 }
 
@@ -319,7 +349,11 @@ function drawTarget(t) {
   if (fade <= 0) return;
   ctx.globalAlpha = fade;
   const pulse = 0.5 + 0.5 * Math.sin(game.time * 3 + t.phase);
-  if (t.type === 'totem') {
+  if (t.type === 'totem' && ready(ART.crystal)) {
+    ctx.fillStyle = `rgba(155,95,192,${0.25 + 0.2 * pulse})`;
+    ctx.beginPath(); ctx.arc(t.x, t.y, 15, 0, 7); ctx.fill();
+    drawFrame(ART.crystal, Math.floor(game.time * 6 + t.phase), 32, 32, t.x - 14, t.y - 16 + Math.sin(game.time * 2 + t.phase) * 1.5, 28, 28);
+  } else if (t.type === 'totem') {
     ctx.fillStyle = `rgba(155,95,192,${0.25 + 0.2 * pulse})`;
     ctx.beginPath(); ctx.arc(t.x, t.y, 13, 0, 7); ctx.fill();
     ctx.fillStyle = '#222034';
@@ -336,7 +370,27 @@ function drawTarget(t) {
     ctx.fillStyle = '#9badb7';
     ctx.fillRect(t.x - 10, t.y - 1, 20, 3);
     for (let i = -9; i <= 7; i += 4) { ctx.fillRect(t.x + i, t.y - 5, 2, 4); }
-  } else if (t.type === 'crow') {
+  } else if (t.type === 'bat' && ready(ART.bat)) {
+    ctx.fillStyle = 'rgba(118,66,138,0.25)';
+    ctx.beginPath(); ctx.arc(t.x, t.y, 13, 0, 7); ctx.fill();
+    ctx.save();
+    ctx.translate(t.x, t.y);
+    if ((t.dir || 1) < 0) ctx.scale(-1, 1);
+    drawFrame(ART.bat, Math.floor(game.time * 12 + t.phase), 32, 32, -17, -17, 34, 34);
+    ctx.restore();
+  } else if (t.type === 'beast' && ready(ART.beast)) {
+    // Halo violet qui pulse : la bête est noire, il faut la voir sur le fond sombre.
+    const glow = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, 34);
+    glow.addColorStop(0, `rgba(190,110,230,${0.45 + 0.2 * pulse})`);
+    glow.addColorStop(1, 'rgba(190,110,230,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(t.x - 34, t.y - 34, 68, 68);
+    ctx.save();
+    ctx.translate(t.x, t.y);
+    if ((t.dir || 1) < 0) ctx.scale(-1, 1);
+    drawFrame(ART.beast, Math.floor(game.time * 14 + t.phase), 100, 56, -30, -20, 60, 34);
+    ctx.restore();
+  } else if (t.type === 'bat' || t.type === 'beast') {
     const flap = Math.sin(game.time * 12 + t.phase) > 0 ? -4 : 2;
     ctx.fillStyle = 'rgba(118,66,138,0.25)';
     ctx.beginPath(); ctx.arc(t.x, t.y, 13, 0, 7); ctx.fill();
@@ -406,14 +460,15 @@ function draw() {
   sky.addColorStop(1, th.sky[1]);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-  treeLine(7 + game.zone, GROUND - 10, 110, th.far, 0.6);
+  const painted = drawBackdrop(z);
+  if (!painted) treeLine(7 + game.zone, GROUND - 10, 110, th.far, 0.6);
   ctx.fillStyle = th.fog;
   for (let i = 0; i < 4; i++) {
     ctx.beginPath();
     ctx.ellipse(((i * 160 + game.time * 6) % (VIEW_W + 200)) - 100, GROUND - 30 - i * 12, 120, 14, 0, 0, 7);
     ctx.fill();
   }
-  treeLine(19 + game.zone, GROUND, 70, th.near, 1);
+  if (!painted) treeLine(19 + game.zone, GROUND, 70, th.near, 1);
   ctx.fillStyle = th.ground;
   ctx.fillRect(0, GROUND, VIEW_W, VIEW_H - GROUND);
   ctx.fillStyle = 'rgba(255,255,255,0.06)';
@@ -460,7 +515,18 @@ function draw() {
     fg.addColorStop(1, 'rgba(217,60,30,0)');
     ctx.fillStyle = fg;
     ctx.beginPath(); ctx.arc(b.x, b.y, r * 3, 0, 7); ctx.fill();
+    if (ready(ART.fireball)) {
+      // La flamme animée, tournée dans le sens de la course, la tête sur la boule.
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(Math.atan2(b.vy, b.vx));
+      ctx.imageSmoothingEnabled = true;
+      drawFrame(ART.fireball, Math.floor(game.time * 30), 94, 54, -32, -12, 42, 24);
+      ctx.imageSmoothingEnabled = false;
+      ctx.restore();
+    }
   }
+  drawEffects();
 
   game.sparks.forEach(p => {
     ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
@@ -482,6 +548,34 @@ function draw() {
   if (game.state === 'over') drawCenter('À suivre…', 'Touche pour recommencer l\'histoire');
   drawHold();
   ctx.restore();
+}
+
+// Fond illustré de la zone ; renvoie false s'il n'est pas encore chargé.
+function drawBackdrop(z) {
+  if (z.backdrop === 'lisiere' && ready(ART.lisiere)) {
+    // Travelling animé à travers la forêt au crépuscule (64 images en boucle).
+    const f = Math.floor(game.time / 0.17) % 64;
+    ctx.drawImage(ART.lisiere, (f % 8) * 256, Math.floor(f / 8) * 128, 256, 128, 0, 0, VIEW_W, GROUND);
+  } else if (z.backdrop && ART[z.backdrop] && ready(ART[z.backdrop])) {
+    // Forêt peinte, qui dérive très lentement.
+    const img = ART[z.backdrop], w = img.naturalWidth * GROUND / img.naturalHeight;
+    const x = -(w - VIEW_W) / 2 + Math.sin(game.time * 0.05) * (w - VIEW_W) / 2;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(img, x, 0, w, GROUND);
+    ctx.imageSmoothingEnabled = false;
+  } else return false;
+  ctx.fillStyle = z.theme.shade || 'rgba(12,10,20,0.25)';
+  ctx.fillRect(0, 0, VIEW_W, GROUND);
+  return true;
+}
+
+function drawEffects() {
+  for (const e of game.effects) {
+    const big = e.kind === 'explosion', img = big ? ART.explosion : ART.puff;
+    if (!ready(img)) continue;
+    const fs = big ? 64 : 32, size = big ? 44 : 22, frame = Math.min(7, Math.floor(e.t / 0.055));
+    drawFrame(img, frame, fs, fs, e.x - size / 2, e.y - size / 2, size, size);
+  }
 }
 
 function drawCenter(title, sub) {
@@ -560,6 +654,7 @@ async function begin(fromZone) {
   try {
     audio = audio || new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === 'suspended') audio.resume();
+    Sound.init(audio);
   } catch (_) { /* pas de son */ }
   startScreen.hidden = true;
   game.state = 'calib';
@@ -588,6 +683,13 @@ if (saved !== null && saved > 0) {
   continueBtn.addEventListener('click', () => begin(saved));
 }
 newBtn.addEventListener('click', () => begin(null));
+const musicBtn = document.getElementById('music');
+function syncMusicButton(on) {
+  musicBtn.textContent = on ? 'Musique : oui' : 'Musique : non';
+  musicBtn.classList.toggle('off', !on);
+}
+musicBtn.addEventListener('click', () => syncMusicButton(Sound.toggleMusic()));
+syncMusicButton(Sound.isMusicOn());
 document.querySelectorAll('[data-axis]').forEach(btn => {
   const axis = btn.dataset.axis, key = axis === 'x' ? 'invertX' : 'invertY';
   btn.classList.toggle('off', !Tilt.state.prefs[key]);

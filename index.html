@@ -82,6 +82,7 @@
     <div class="row">
       <button class="small off" data-axis="x">Inverser G/D</button>
       <button class="small off" data-axis="y">Inverser H/B</button>
+      <button class="small" id="music">Musique : oui</button>
     </div>
     <p><a href="test-gyro/">Test du gyroscope</a> · <a href="archive/">Ancien jeu : Petit Saut</a></p>
   </div>
@@ -95,8 +96,9 @@
       box.textContent += 'Erreur : ' + e.message + ' (' + (e.filename || '').split('/').pop() + ':' + e.lineno + ')\n';
     });
   </script>
-  <script src="js/tilt.js?v=2"></script>
-  <script src="js/zones.js?v=2"></script>
-  <script src="js/game.js?v=2"></script>
+  <script src="js/tilt.js?v=3"></script>
+  <script src="js/assets.js?v=3"></script>
+  <script src="js/zones.js?v=3"></script>
+  <script src="js/game.js?v=3"></script>
 </body>
 </html>
