@@ -1,50 +1,40 @@
-# Petit Saut
+# Brumelune : la traversée
 
-Un mini jeu de plate-forme 2D en pixel art, jouable dans le navigateur.
-Il est écrit en HTML, CSS et JavaScript, sans aucune dépendance.
+Nouveau projet de jeu contemplatif, jouable dans le navigateur, qui se contrôle en **inclinant le
+téléphone** (gyroscope). Il reprend l'univers et la magicienne de l'ancien jeu.
 
-**Jouer :** https://tercommit.github.io/jubilant-octo-guacamole/ (une fois GitHub Pages activé)
+**Page actuelle :** https://tercommit.github.io/jubilant-octo-guacamole/
 
-## Commandes
+Pour l'instant, la page est un **test du gyroscope** : on y vérifie l'autorisation, la réception
+des mesures et la calibration, et on guide Lyra pour attraper des lucioles.
 
-| Action  | Clavier                    | Mobile        |
-|---------|----------------------------|---------------|
-| Bouger  | Flèches ou Z Q S D (ou W A S D) | Croix ◀ ▲ ▼ ▶ |
-| Sauter  | Espace, ↑, Z ou W          | Bouton A      |
-| Entrer, boire, lire (sur l'île) | Espace ou Entrée | Bouton A |
-| Bouclier (une fois trouvé) | X                | Bouton B      |
-| Ravageuse (une fois trouvée, coûte une vie) | C | Bouton R, à maintenir ½ s |
-| Pause   | P ou Échap                 |               |
+## Le test du gyroscope
 
-Plus on maintient le saut, plus on saute haut. Pour écraser un slime, il faut lui sauter dessus.
+1. Toucher **Commencer**. Sur iPhone, Safari demande l'accès aux mouvements : accepter.
+2. Garder le téléphone immobile pendant la calibration : la position où l'on tient le téléphone
+   devient la position neutre (assis, allongé, peu importe).
+3. Pencher le téléphone : Lyra glisse dans ce sens, comme une bille.
 
-## Contenu
+Le panneau **Infos** affiche quatre voyants (autorisation, mesures par seconde, calibration,
+inclinaison), les angles bruts et la position neutre. Le niveau à bulle, en bas à droite, montre
+l'inclinaison.
 
-- L'île de Brumelune, vue de dessus (style Pokémon) : on s'y déplace case par case et on entre
-  dans les missions. Les arbres passent devant le personnage (effet 2.5D).
-- 3 missions (forêt brumeuse, marais empoisonné, volcan) : chacune ouvre, dans la brume, le chemin de la suivante
-- La forêt brumeuse donne le bouclier (2 s d'invincibilité, 4 s de recharge) et fait tomber des
-  pluies de slime des nuages de brume
-- Le marais donne la ravageuse (détruit tous les ennemis à l'écran, coûte une vie), avec un gardien
-  de pierre, des slimes à piques et du poison
-- Le volcan se termine par le combat contre le Roi des slimes, avec deux fins possibles
-- Des lanternes servent de points de reprise après une mort
-- La source de soin, au centre de l'île, redonne toutes les vies : c'est le seul endroit où se soigner
-- 3 vies (en cas de mort, la mission recommence ; sans vie, on se réveille près de la source)
-- Sauvegarde automatique dans le navigateur (`localStorage`) : missions terminées, vies, pièces et position
-  sur l'île. Pour recommencer, cliquer sur « Nouvelle partie » (touche N)
-- L'histoire et les règles prévues sont décrites dans `HISTOIRE.md`
-- Les sons sont générés en direct avec la Web Audio API (aucun fichier audio)
+- **Recalibrer** : bouton, appui long d'une seconde n'importe où sur la scène, ou touche C.
+- **Inverser G/D, Inverser H/B** : au cas où un axe partirait dans le mauvais sens sur un appareil.
+- **Sans gyroscope** (accès refusé, ordinateur) : glisser le doigt n'importe où, ou flèches du clavier.
+- Si l'accès a été refusé sur iPhone : Réglages › Safari › Avancé › Données des sites web,
+  supprimer celles du site, puis recharger la page.
+
+Le jeu calcule la direction de la gravité vue depuis l'écran plutôt que d'utiliser les angles
+bruts : il n'y a pas de saut quand on tient le téléphone presque à la verticale, et la
+rotation portrait/paysage est prise en compte.
 
 ## Fichiers
 
-- `index.html` : la page, l'interface et les contrôles tactiles
-- `game.js` : le moteur (physique, collisions, ennemis, affichage)
-- `world.js` : l'île (carte modifiable à la main, légende en haut du fichier), les missions et les textes
-- `boss.js` : le Roi des slimes, le combat final et les deux fins
-- `sprites.js` : le pixel art des décors, ennemis et pièces, dessiné sous forme de texte
-- `player.png` : la planche d'images du personnage (attente et marche)
-- `levels.js` : les cartes des niveaux, modifiables à la main (la légende est en haut du fichier)
+- `index.html` : la page de test (tout le code est dans le fichier)
+- `player.png` : la planche d'images de la magicienne
+- `archive/` : l'ancien jeu, **Petit Saut** (plate-forme, île de Brumelune, Roi des slimes),
+  conservé tel quel et toujours jouable sur https://tercommit.github.io/jubilant-octo-guacamole/archive/
 
 ## Publier avec GitHub Pages
 
@@ -52,12 +42,9 @@ Settings → Pages → *Deploy from a branch* → branche `main`, dossier `/ (ro
 
 ## Licence
 
-Le code, les niveaux et les graphismes de `sprites.js` sont placés dans le domaine public sous
+Le code est placé dans le domaine public sous
 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.fr). Voir `LICENSE`.
 
-**Exception :** le personnage (`player.png`) n'est pas couvert par CC0. Il est tiré du pack
-« sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retourné pour regarder vers la droite.
-Il reste soumis à la licence choisie par son auteur ou autrice.
-
-Pour remplacer les graphismes, les packs de [Kenney](https://kenney.nl/assets) (par exemple
-« Pixel Platformer ») sont eux aussi en CC0 et utilisent des tuiles de 16×16 px.
+**Exception :** la magicienne (`player.png`) n'est pas couverte par CC0. Elle est tirée du pack
+« sample (idle & walk) » publié sur itch.io (fichier 16345894 du projet 4245635), retournée pour
+regarder vers la droite. Elle reste soumise à la licence choisie par son auteur ou autrice.
