@@ -7,6 +7,7 @@ Chaque version est conservée dans `archives/` et reste jouable.
 
 | Version | Jeu | Dossier | Jouer |
 |---------|-----|---------|-------|
+| V3 | **La Gardienne** : on suit la boule de feu en fausse 3D, guidée à gauche ou à droite | `archives/v3/` | https://tercommit.github.io/jubilant-octo-guacamole/archives/v3/ |
 | V2 | **La Gardienne** : boules de feu guidées au gyroscope (mise de côté, contrôle peu pratique) | `archives/v2/` | https://tercommit.github.io/jubilant-octo-guacamole/archives/v2/ |
 | V1 | **Petit Saut** : plate-forme en pixel art, île de Brumelune et Roi des slimes | `archives/v1/` | https://tercommit.github.io/jubilant-octo-guacamole/archives/v1/ |
 
@@ -15,7 +16,7 @@ Chaque dossier a son propre README (contenu, commandes, fichiers, crédits).
 ## Fichiers
 
 - `index.html` : la page d'accueil, avec un lien vers chaque version
-- `archives/v1/`, `archives/v2/` : les versions, chacune avec un `apercu.jpg` pour la page d'accueil
+- `archives/v1/`, `archives/v2/`, `archives/v3/` : les versions, chacune avec un `apercu.jpg` pour la page d'accueil
 - `LICENSE` : la licence du code (CC0)
 
 ## Publier avec GitHub Pages
