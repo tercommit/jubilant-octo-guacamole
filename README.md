@@ -16,7 +16,8 @@ Chaque dossier a son propre README (contenu, commandes, fichiers, crédits).
 
 ## Méthode : une nouvelle version = une copie
 
-- Une version publiée n'est **jamais modifiée** : son dossier dans `archives/` reste tel quel.
+- La **version en cours** (la plus récente) peut encore être ajustée sur place.
+- Dès qu'on passe à la suivante, elle est **figée** : son dossier dans `archives/` ne change plus.
 - Une nouvelle version commence par une **copie complète** de la dernière version
   (ou de celle qu'on choisit) dans un nouveau dossier `archives/vN/`, dans un commit à part.
 - Les changements se font ensuite **uniquement dans cette copie**, dans les commits suivants.

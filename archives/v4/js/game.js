@@ -47,7 +47,7 @@ const LEVEL = {
     { x: 0.6, z: 14 },
     { x: -0.8, z: 22 },
     { x: 0.3, z: 32 },
-    { x: 0, z: 42, ax: 0.7, speed: 1.3 },
+    { x: 0, z: 44, ax: 0.7, speed: 1.3 }, // 1 s après le poteau de droite, comme le dernier fragment
     { x: 0, z: 56, ax: 0.8, speed: 1.0 },
   ],
 };
