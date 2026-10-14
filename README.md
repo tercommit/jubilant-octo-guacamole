@@ -14,6 +14,16 @@ Chaque version est conservée dans `archives/` et reste jouable.
 
 Chaque dossier a son propre README (contenu, commandes, fichiers, crédits).
 
+## Méthode : une nouvelle version = une copie
+
+- Une version publiée n'est **jamais modifiée** : son dossier dans `archives/` reste tel quel.
+- Une nouvelle version commence par une **copie complète** de la dernière version
+  (ou de celle qu'on choisit) dans un nouveau dossier `archives/vN/`, dans un commit à part.
+- Les changements se font ensuite **uniquement dans cette copie**, dans les commits suivants.
+  L'historique montre ainsi exactement ce qui a changé d'une version à l'autre.
+- La page d'accueil (`index.html`) reçoit une carte pour la nouvelle version, en haut ; les cartes
+  des autres versions ne changent pas.
+
 ## Fichiers
 
 - `index.html` : la page d'accueil, avec un lien vers chaque version
