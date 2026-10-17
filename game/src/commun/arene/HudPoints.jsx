@@ -20,7 +20,7 @@ export default function HudPoints({ etat, texte, enPartie }) {
         <div key={i} className={`score ${COINS[i]}`} style={{ '--c': j.couleur }}>
           <span className="pastille" />
           <span className="nom">{j.nom}</span>
-          <span className="points">{j.points}</span>
+          <span className="points">{j.elimine ? '✗' : j.points}</span>
         </div>
       ))}
 
@@ -50,13 +50,13 @@ export default function HudPoints({ etat, texte, enPartie }) {
 
       {phase === 'fin' && classement && (
         <div className="panneau">
-          <h1>Temps écoulé&nbsp;!</h1>
+          <h1>{temps > 0 ? 'Terminé\u00a0!' : 'Temps écoulé\u00a0!'}</h1>
           <ol className="classement">
             {classement.map((c) => (
               <li key={c.joueur} style={{ '--c': joueurs[c.joueur].couleur }}>
                 <span className="rang">{PLACES[c.place - 1]}</span>
                 <span className="nom">{joueurs[c.joueur].nom}</span>
-                <span className="pts">{c.points} {unite(c.points)}</span>
+                <span className="pts">{c.points} {unite(c.points)}{c.elimine && ' · éliminé'}</span>
                 <span className="zarlor">+{c.zarlor} zarlor</span>
               </li>
             ))}
@@ -75,6 +75,8 @@ export function etatHud(p, config, nomJoueur) {
   return {
     phase: p.phase, menu: p.menu && { ...p.menu }, temps: p.temps, duree: config.duree, decompte: p.decompte,
     classement: p.classement, finPrete: (p.finDepuis ?? 0) > 1.5,
-    joueurs: p.joueurs.map((j) => ({ points: j.points, pret: j.pret, couleur: j.couleur, nom: nomJoueur(j.index) })),
+    joueurs: p.joueurs.map((j) => ({
+      points: j.points, pret: j.pret, couleur: j.couleur, nom: nomJoueur(j.index), elimine: j.elimine != null,
+    })),
   }
 }

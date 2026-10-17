@@ -5,6 +5,7 @@ import { deroule, majDeroule } from '../../commun/arene/deroule.js'
 import { creerCoureur, deplacerCoureurs, sonner, enJeu, opsArene } from '../../commun/arene/coureurs.js'
 import { majLutte } from '../../commun/lutte.js'
 import { majPieces } from '../../commun/arene/pieces.js'
+import { GAINS } from '../../commun/gains.js'
 
 /** Secondes de jeu écoulées (0 pendant les règles et le compte à rebours). */
 export const horloge = (p) => CONFIG.duree - p.temps
@@ -25,7 +26,7 @@ export function creerPartie(joueurs, aleatoire = Math.random) {
     aleatoire,
   }
   p.ops = opsArene(p.regles)
-  p.joueurs = joueurs.map((j, i) => ({ ...creerCoureur(j, i, ...versMonde(...DEPARTS[i]), p.regles), horsJeu: false, retour: 0 }))
+  p.joueurs = joueurs.map((j, i) => ({ ...creerCoureur(j, i, ...versMonde(...DEPARTS[i]), p.regles), horsJeu: false, elimine: null }))
   return p
 }
 
@@ -34,33 +35,32 @@ const sures = (p, delai = 0) => {
   return [...p.tuiles.values()].filter((u) => etatTuile(u, t) === 'pierre')
 }
 
+/** Toucher la lave élimine pour le reste du mini-jeu. */
 function brulures(p, evts) {
-  const { brulure } = CONFIG
   for (const j of p.joueurs) {
-    // porté ou en vol : on ne touche pas le sol (on se brûle en retombant)
-    if (!enJeu(j) || j.invincible > 0) continue
+    // porté ou en vol : on ne touche pas le sol (c'est en retombant que ça compte)
+    if (!enJeu(j)) continue
     const t = p.regles.tuileEn(j.x, j.z)
     if (!t || etatTuile(t, horloge(p)) !== 'lave') continue
-    j.points = Math.max(0, j.points - brulure.perte)
     j.horsJeu = true
-    j.retour = brulure.horsJeu
-    evts.push({ type: 'brule', joueur: j.index, x: j.x, z: j.z })
+    j.elimine = horloge(p)
+    evts.push({ type: 'elimine', joueur: j.index, x: j.x, z: j.z })
   }
 }
 
-function retours(p, dt) {
-  for (const j of p.joueurs) {
-    if (!j.horsJeu || (j.retour -= dt) > 0) continue
-    // réapparaît sur la tuile sûre la plus proche
-    let best = null, dmin = Infinity
-    for (const u of sures(p, 1)) {
-      const d = Math.hypot(u.x - j.x, u.z - j.z)
-      if (d < dmin) { dmin = d; best = u }
-    }
-    if (best) Object.assign(j, { x: best.x, z: best.z, kx: 0, kz: 0 })
-    j.horsJeu = false
-    j.invincible = CONFIG.brulure.invincible
-  }
+/**
+ * Classement : d'abord les survivants (aux pièces), puis les éliminés, du dernier sorti au premier.
+ * Les ex æquo partagent la meilleure place et le meilleur gain.
+ */
+export function classement(joueurs) {
+  const score = (j) => (j.elimine === null ? 1e6 + j.points : j.elimine)
+  const tri = [...joueurs].sort((a, b) => score(b) - score(a))
+  const gains = GAINS[joueurs.length] || GAINS[4]
+  let place = 0
+  return tri.map((j, i) => {
+    if (i === 0 || score(j) < score(tri[i - 1])) place = i + 1
+    return { joueur: j.index, points: j.points, elimine: j.elimine !== null, place, zarlor: gains[place - 1] ?? 0 }
+  })
 }
 
 function majBombes(p, dt, evts) {
@@ -96,21 +96,30 @@ function majBombes(p, dt, evts) {
 
 /**
  * Avance la partie de `dt` secondes.
- * @returns évènements ({type: 'point' | 'brule' | 'explosion' | 'touche' | 'fin' | 'passer' …})
+ * @returns évènements ({type: 'point' | 'elimine' | 'explosion' | 'touche' | 'fin' | 'passer' …})
  */
 export function majPartie(p, dt, entrees) {
   const evts = []
-  if (majDeroule(p, dt, entrees, evts) !== 'jeu') return evts
+  const etape = majDeroule(p, dt, entrees, evts)
+  if (etape === 'fin') p.classement = classement(p.joueurs)
+  if (etape !== 'jeu') return evts
 
   deplacerCoureurs(p, dt, entrees, evts, p.regles)
   majLutte(p, dt, entrees, evts, p.ops)
   brulures(p, evts)
-  retours(p, dt)
   majBombes(p, dt, evts)
   majPieces(p, evts, sures(p, 3).map((u) => [u.x, u.z]), {
     nombre: CONFIG.pieces.enPlus + p.joueurs.length * CONFIG.pieces.parJoueur,
     rayon: CONFIG.pieces.rayon,
     distanceMin: CONFIG.pieces.distanceMin,
   })
+
+  // Fin anticipée : plus personne en course, ou un seul survivant à plusieurs
+  const survivants = p.joueurs.filter((j) => j.elimine === null).length
+  if (survivants === 0 || (p.joueurs.length > 1 && survivants === 1)) {
+    p.phase = 'fin'
+    p.classement = classement(p.joueurs)
+    evts.push({ type: 'fin' })
+  }
   return evts
 }

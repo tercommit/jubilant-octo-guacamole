@@ -24,7 +24,8 @@ export function construireTuiles(aleatoire) {
   tuiles.get(cle(0, 0)).type = 'cratere'
   for (const [q, r] of ROCHERS) tuiles.get(cle(q, r)).type = 'rocher'
   for (const t of tuiles.values()) {
-    if (t.type === 'cratere' || !(t.q > 0 || (t.q === 0 && t.r > 0))) continue
+    // l'anneau extérieur reste toujours sûr : on peut survivre jusqu'au bout
+    if (t.type === 'cratere' || anneau(t.q, t.r) === CONFIG.rayonCarte || !(t.q > 0 || (t.q === 0 && t.r > 0))) continue
     const h = debut + (anneau(t.q, t.r) - 1) * pas + aleatoire() * pas * hasard
     t.lave = h
     tuiles.get(cle(-t.q, -t.r)).lave = h

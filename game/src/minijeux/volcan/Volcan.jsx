@@ -15,9 +15,9 @@ const JEU = {
   sol: '#4a2a1a',
   texte: {
     titre: 'Fuis la coulée',
-    regle: "Ramasse les pièces pendant que la lave sort du cratère ! Marcher dans la lave fait perdre une pièce, et gare aux bombes volcaniques.",
+    regle: "La lave sort du cratère : si tu la touches, tu es éliminé ! Ramasse les pièces et gare aux bombes volcaniques.",
     commandes: [['Stick', 'se déplacer'], ['A', 'sprint'], ['B', 'pousser · attraper · lancer']],
-    resume: '1 pièce = 1 point · la lave en fait perdre 1',
+    resume: 'les survivants sont classés aux pièces',
     unite: ['pièce', 'pièces'],
     chargement: 'Chargement du volcan…',
   },

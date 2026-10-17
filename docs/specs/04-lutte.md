@@ -28,7 +28,7 @@ Le porteur lâche aussi sa prise s'il est sonné (bombe, obstacle), s'il tombe o
 | Sentier de Mafate | Bousculer celui qui va prendre la balise, le porter loin d'elle. |
 | La Ti Diagonale | Pousser ou jeter les autres dans la ravine, les ralentir avant un obstacle. |
 | Le trésor de La Buse | Jeter un rival dans l'eau (où il nage lentement), l'écarter du coffre. |
-| Fuis la coulée | Jeter un rival dans la lave : il perd une pièce. |
+| Fuis la coulée | Jeter un rival dans la lave : il est éliminé. |
 
 Un joueur porté ou en vol ne ramasse rien et n'est touché ni par la lave ni par les bombes : c'est à l'atterrissage
 que ça compte.

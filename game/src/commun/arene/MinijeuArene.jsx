@@ -23,6 +23,7 @@ function Boucle({ jeu, partieRef, effetsRef, setHud, onTermine }) {
     for (const e of evts) {
       if (e.type === 'point') effetsRef.current.push({ x: e.x, z: e.z, couleur: p.joueurs[e.joueur].couleur, t0: clock.elapsedTime })
       if (e.type === 'choc') effetsRef.current.push({ x: e.x, z: e.z, couleur: '#ffffff', t0: clock.elapsedTime })
+      if (e.type === 'elimine') effetsRef.current.push({ x: e.x, z: e.z, couleur: '#ff6a1f', t0: clock.elapsedTime })
       if (e.type === 'passer') return onTermine(classementPasse(p.joueurs), 'passer')
       if (e.type === 'kit') changerKit()
     }
