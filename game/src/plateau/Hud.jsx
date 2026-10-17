@@ -1,6 +1,7 @@
 // Interface du plateau (DOM par-dessus le canvas).
 import { CONFIG } from './config.js'
 import { MINIJEUX } from '../minijeux/index.js'
+import MenuPause from '../commun/MenuPause.jsx'
 
 const COINS = ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd']
 const PLACES = ['1er', '2e', '3e', '4e']
@@ -23,7 +24,7 @@ function Fiche({ j, actif }) {
 
 export default function Hud({ etat }) {
   if (!etat) return <div className="hud"><div className="chargement">Chargement de l'île…</div></div>
-  const { phase, etape, pause, tour, tours, choixTours, de, pas, message, minijeu, ordre, classement, actif, joueurs } = etat
+  const { phase, etape, menu, minijeuPasse, tour, tours, choixTours, de, pas, message, minijeu, ordre, classement, actif, joueurs } = etat
   const ja = actif !== null ? joueurs[actif] : null
 
   return (
@@ -97,17 +98,18 @@ export default function Hud({ etat }) {
 
       {message && <div className="message">{message}</div>}
 
-      {phase === 'annonceMinijeu' && (
+      {phase === 'annonceMinijeu' && !menu && (
         <div className="panneau">
           <h1>Mini-jeu&nbsp;!</h1>
           <p className="regle">{nomMinijeu(minijeu)}</p>
-          <p className="suite"><b>A</b> c'est parti</p>
+          <p className="suite"><b>A</b> c'est parti · <b>Start</b> menu (pour le passer)</p>
         </div>
       )}
 
       {phase === 'bilan' && (
         <div className="panneau">
           <h1>Fin du tour {tour}</h1>
+          {minijeuPasse && <p className="petit">Mini-jeu passé&nbsp;: personne ne gagne de zarlor.</p>}
           <ol className="classement">
             {joueurs.map((j, i) => (
               <li key={i} style={{ '--c': j.couleur }}>
@@ -139,13 +141,7 @@ export default function Hud({ etat }) {
         </div>
       )}
 
-      {pause && (
-        <div className="panneau">
-          <h1>Pause</h1>
-          <p>Appuie sur <b>Start</b> pour reprendre.</p>
-          <p className="petit">Si une manette s'est déconnectée, rallume-la puis appuie sur Start.</p>
-        </div>
-      )}
+      {menu && <MenuPause menu={menu} />}
     </div>
   )
 }

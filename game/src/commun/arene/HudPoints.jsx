@@ -1,12 +1,14 @@
-// Interface du mini-jeu (DOM par-dessus le canvas).
-import { CONFIG } from './config.js'
+// Interface commune des mini-jeux à points (DOM par-dessus le canvas).
+// `texte` : { titre, regle, commandes: [[touche, action]], resume, unite: [singulier, pluriel], chargement }
+import MenuPause from '../MenuPause.jsx'
 
 const COINS = ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd']
 const PLACES = ['1er', '2e', '3e', '4e']
 
-export default function Hud({ etat, enPartie }) {
-  if (!etat) return <div className="hud"><div className="chargement">Chargement du cirque…</div></div>
-  const { phase, pause, temps, decompte, joueurs, classement, finPrete } = etat
+export default function HudPoints({ etat, texte, enPartie }) {
+  if (!etat) return <div className="hud"><div className="chargement">{texte.chargement}</div></div>
+  const { phase, menu, temps, duree, decompte, joueurs, classement, finPrete } = etat
+  const unite = (n) => texte.unite[n > 1 ? 1 : 0]
 
   return (
     <div className="hud">
@@ -22,16 +24,15 @@ export default function Hud({ etat, enPartie }) {
         </div>
       ))}
 
-      {phase === 'regles' && (
+      {phase === 'regles' && !menu && (
         <div className="panneau">
-          <h1>Sentier de Mafate</h1>
-          <p className="regle">Cours jusqu'à la balise avant les autres&nbsp;! La forêt te ralentit, la ravine ne se traverse que par les ponts.</p>
+          <h1>{texte.titre}</h1>
+          <p className="regle">{texte.regle}</p>
           <div className="commandes">
-            <span><b>Stick</b> se déplacer</span>
-            <span><b>A</b> sprint</span>
-            <span><b>Start</b> pause</span>
+            {texte.commandes.map(([touche, action]) => <span key={touche}><b>{touche}</b> {action}</span>)}
+            <span><b>Start</b> menu</span>
           </div>
-          <p className="duree">{CONFIG.duree} secondes · 1 balise = 1 point</p>
+          <p className="duree">{duree} secondes · {texte.resume}</p>
           <div className="prets">
             {joueurs.map((j, i) => (
               <span key={i} className={`pret ${j.pret ? 'ok' : ''}`} style={{ '--c': j.couleur }}>
@@ -42,16 +43,10 @@ export default function Hud({ etat, enPartie }) {
         </div>
       )}
 
-      {phase === 'decompte' && <div className="decompte" key={Math.ceil(decompte)}>{Math.ceil(decompte)}</div>}
-      {phase === 'jeu' && CONFIG.duree - temps < 0.8 && <div className="decompte partez">Partez&nbsp;!</div>}
+      {phase === 'decompte' && !menu && <div className="decompte" key={Math.ceil(decompte)}>{Math.ceil(decompte)}</div>}
+      {phase === 'jeu' && duree - temps < 0.8 && <div className="decompte partez">Partez&nbsp;!</div>}
 
-      {pause && (
-        <div className="panneau">
-          <h1>Pause</h1>
-          <p>Appuie sur <b>Start</b> pour reprendre.</p>
-          <p className="petit">Si une manette s'est déconnectée, rallume-la puis appuie sur Start.</p>
-        </div>
-      )}
+      {menu && <MenuPause menu={menu} />}
 
       {phase === 'fin' && classement && (
         <div className="panneau">
@@ -61,7 +56,7 @@ export default function Hud({ etat, enPartie }) {
               <li key={c.joueur} style={{ '--c': joueurs[c.joueur].couleur }}>
                 <span className="rang">{PLACES[c.place - 1]}</span>
                 <span className="nom">{joueurs[c.joueur].nom}</span>
-                <span className="pts">{c.points} balise{c.points > 1 ? 's' : ''}</span>
+                <span className="pts">{c.points} {unite(c.points)}</span>
                 <span className="zarlor">+{c.zarlor} zarlor</span>
               </li>
             ))}
@@ -73,4 +68,13 @@ export default function Hud({ etat, enPartie }) {
       )}
     </div>
   )
+}
+
+/** Instantané de l'état pour le HUD (appelé ~10 fois par seconde). */
+export function etatHud(p, config, nomJoueur) {
+  return {
+    phase: p.phase, menu: p.menu && { ...p.menu }, temps: p.temps, duree: config.duree, decompte: p.decompte,
+    classement: p.classement, finPrete: (p.finDepuis ?? 0) > 1.5,
+    joueurs: p.joueurs.map((j) => ({ points: j.points, pret: j.pret, couleur: j.couleur, nom: nomJoueur(j.index) })),
+  }
 }

@@ -1,9 +1,16 @@
 # Plateau Réunion — prototype
 
 Party game de plateau en 3D low poly (Three.js + React Three Fiber). Le **plateau** est jouable
-(voir `docs/specs/02-plateau.md`), avec deux mini-jeux tirés au sort à chaque tour, jouables aussi seuls :
-**« Sentier de Mafate »** (Forêt des Hauts, voir `docs/specs/minijeux/foret-des-hauts.md`) et
-**« La Ti Diagonale »** (parcours d'obstacles, voir `docs/specs/minijeux/ti-diagonale.md`).
+(voir `docs/specs/02-plateau.md`), avec quatre mini-jeux tirés au sort à chaque tour, jouables aussi seuls
+(fiches dans `docs/specs/minijeux/`) :
+
+- **« Sentier de Mafate »** (Forêt des Hauts) : course d'orientation vers des balises
+- **« La Ti Diagonale »** : parcours d'obstacles
+- **« Le trésor de La Buse »** (Lagon) : pièces à ramasser avant la marée
+- **« Fuis la coulée »** (Volcan) : pièces à ramasser en fuyant la lave et les bombes
+
+Deux kits de personnages au choix (Quaternius ou KayKit), et un menu Start pour passer un mini-jeu :
+voir `docs/specs/03-menu-et-personnages.md`.
 
 ## Lancer
 
@@ -14,7 +21,8 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
 
 - Chaque joueur appuie sur **A** de sa manette pour rejoindre la partie (de 1 à 4 : le solo est possible).
   J1 choisit « Partie sur le plateau » ou un mini-jeu avec le stick (gauche / droite), puis appuie sur **Start**.
-  `?jeu=plateau`, `?jeu=foret-des-hauts` ou `?jeu=ti-diagonale` présélectionne le choix.
+  Stick haut / bas : kit de personnages. `?jeu=plateau`, `?jeu=foret-des-hauts`, `?jeu=ti-diagonale`,
+  `?jeu=lagon` ou `?jeu=volcan` présélectionne le jeu ; `?kit=kaykit` impose le kit.
 - **Développement sans manette** : ajouter `?clavier` à l'URL (J1 = ZQSD/WASD + Espace, Échap = Start ;
   J2 = flèches + Entrée, Retour arrière = Start).
 
@@ -23,22 +31,25 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
 ```
 src/
   commun/entrees.js        manettes (Gamepad API) + clavier de dev
-  commun/avatars.js        avatars par défaut et couleurs des joueurs
-  commun/modeles.jsx       chargement glTF, recoloration, avatars animés
+  commun/avatars.js        avatars des deux kits et couleurs des joueurs
+  commun/kit.js            kit de personnages choisi (Quaternius / KayKit), mémorisé
+  commun/modeles.jsx       chargement glTF, recoloration, avatars animés (deux kits)
+  commun/menu.js           menu Start (logique) ; MenuPause.jsx pour l'affichage
   commun/gains.js          zarlor gagnés selon la place
+  commun/arene/            socle des mini-jeux d'arène : déroulé, déplacements, pièces, rendu, HUD
   plateau/                 le plateau : cases (carte.js), logique des tours (logique.js), rendu 3D, HUD
   minijeux/index.js        liste des mini-jeux (salon et tirage au sort)
-  minijeux/foret-des-hauts/
+  minijeux/foret-des-hauts/, lagon/, volcan/
     config.js              paramètres de jeu (durée, vitesses, sprint…)
-    carte.js               carte hexagonale, collisions, apparition des balises
-    logique.js             logique pure (sans rendu) : déplacements, balises, classement
-    Arene.jsx, Scene.jsx   rendu 3D
-    Hud.jsx                interface
-  minijeux/ti-diagonale/   parcours d'obstacles (même organisation : config, piste, logique, rendu, HUD)
+    carte.js               carte hexagonale, collisions, horaires (marée, lave)
+    logique.js             logique pure (sans rendu)
+    Arene.jsx              décor 3D
+  minijeux/ti-diagonale/   parcours d'obstacles (config, piste, logique, rendu, HUD)
 public/assets/             modèles utilisés (Kenney, KayKit, Quaternius — CC0)
 ```
 
 Les textures `*-tropique.png` sont des versions recolorées (vert tropical) des textures d'origine.
+Les textures de `kaykit-adventurers/textures/` sont les versions péi des personnages KayKit (voir `avatars-reunion2.pdf`).
 
 ## Déploiement
 

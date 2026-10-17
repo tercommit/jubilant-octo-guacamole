@@ -58,5 +58,6 @@ De 1 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'î
 
 - 1 plateau simple (une boucle d'environ 30 cases)
 - 4 à 6 avatars jouables (voir `avatars-reunion.pdf`)
-- 3 mini-jeux : **Lagon**, **Volcan**, **Arène de plateformes** (voir `biomes-minijeux.pdf`)
+- 4 mini-jeux : **Lagon**, **Volcan**, **Forêt des Hauts**, **parcours d'obstacles** (voir `biomes-minijeux.pdf`)
+- 2 kits de personnages au choix : Quaternius et KayKit (voir `avatars-reunion.pdf`, `avatars-reunion2.pdf`)
 - Écran titre, choix des joueurs et des avatars, choix du nombre de tours, écran de fin

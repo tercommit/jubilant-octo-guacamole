@@ -37,6 +37,8 @@
 
 En cas d'égalité, les joueurs ex æquo reçoivent tous le gain de la meilleure place.
 
+Un mini-jeu **passé** depuis le menu Start ne rapporte rien à personne (voir `03-menu-et-personnages.md`).
+
 ## La vanille
 
 - Une gousse de vanille est posée sur une case du plateau.
@@ -65,7 +67,7 @@ L'ordre fixé au début reste le même pendant toute la partie.
 | Choisir une direction | Stick ou croix directionnelle, puis A |
 | Acheter la vanille | A pour acheter, B pour refuser |
 | Mini-jeux | Stick + A / B (détail dans chaque fiche) |
-| Pause | Start / Options |
+| Menu (pause, passer un mini-jeu, personnages) | Start / Options |
 
 ## Paramètres à équilibrer en test
 

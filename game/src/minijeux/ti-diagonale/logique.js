@@ -1,13 +1,14 @@
 // Logique pure du mini-jeu (aucune dépendance à React ni à Three.js) : facile à tester.
 import { CONFIG } from './config.js'
 import { GAINS } from '../../commun/gains.js'
+import { majPause, OPTIONS_MINIJEU } from '../../commun/menu.js'
 import {
   Z_DEPART, Z_ARRIVEE, DEPARTS_X, DEPARTS_ARRIERE, CANNES, PICS, COULEE, POINTS_PASSAGE,
   support, xMobile, angleCanne, etatPic, progression,
 } from './piste.js'
 
 /**
- * @param {{appareil: string, avatar: object, couleur: string}[]} joueurs
+ * @param {{appareil: string, couleur: string}[]} joueurs
  */
 export function creerPartie(joueurs, aleatoire = Math.random) {
   const js = joueurs.map((j, i) => ({
@@ -20,6 +21,7 @@ export function creerPartie(joueurs, aleatoire = Math.random) {
   return {
     phase: 'regles', // regles → decompte → jeu → fin
     pause: false,
+    menu: null,
     temps: CONFIG.duree,
     decompte: CONFIG.decompte,
     t: 0, // temps de jeu écoulé : anime tous les obstacles
@@ -186,13 +188,8 @@ export function majPartie(p, dt, entrees) {
   const etat = (j) => entrees.etats.get(j.appareil)
   const appui = (j) => entrees.appuis.get(j.appareil) || {}
 
-  // Pause : Start de n'importe quel joueur, ou manette déconnectée
-  if (p.phase === 'jeu' || p.phase === 'decompte') {
-    const deconnecte = p.joueurs.some((j) => !etat(j)?.connecte)
-    if (deconnecte) p.pause = true
-    else if (p.joueurs.some((j) => appui(j).start)) { p.pause = !p.pause; evts.push({ type: 'pause', pause: p.pause }) }
-  }
-  if (p.pause) return evts
+  // Menu Start (pause), aussi ouvert par une manette déconnectée
+  if (p.phase !== 'fin' && majPause(p, entrees, evts, OPTIONS_MINIJEU)) return evts
 
   if (p.phase === 'regles') {
     for (const j of p.joueurs) if (appui(j).a && !j.pret) { j.pret = true; evts.push({ type: 'pret', joueur: j.index }) }

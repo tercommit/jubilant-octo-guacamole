@@ -1,11 +1,12 @@
 // Carte hexagonale du cirque : types de tuiles, conversions et règles de déplacement.
 import { CONFIG } from './config.js'
+import { cle, VOISINS, disque, grille, cercleLibre } from '../../commun/arene/hex.js'
 
 const S = CONFIG.echelleTuile
 const R = CONFIG.rayonCarte
 export const HAUT_SOL = 0.2 * S // dessus des tuiles d'herbe
+export const { versMonde, versHex } = grille(S)
 
-const cle = (q, r) => `${q},${r}`
 // Ajoute une paire symétrique par rapport au centre (carte équitable pour 4 joueurs).
 const paire = (liste) => liste.flatMap(([q, r]) => (q === 0 && r === 0 ? [[0, 0]] : [[q, r], [-q, -r]]))
 
@@ -20,31 +21,9 @@ const REMPARTS = [
 ]
 export const DEPARTS = [[-4, 4], [0, 4], [4, -4], [0, -4]]
 
-export function versMonde(q, r) {
-  return [S * (q + r / 2), S * 0.866 * r]
-}
-
-export function versHex(x, z) {
-  const r = z / (S * 0.866)
-  const q = x / S - r / 2
-  // arrondi en coordonnées cubiques
-  let rx = Math.round(q), rz = Math.round(r), ry = Math.round(-q - r)
-  const dx = Math.abs(rx - q), dz = Math.abs(rz - r), dy = Math.abs(ry + q + r)
-  if (dx > dy && dx > dz) rx = -ry - rz
-  else if (dz > dy) rz = -rx - ry
-  return [rx, rz]
-}
-
 function construire() {
   const tuiles = new Map()
-  for (let q = -R; q <= R; q++) {
-    for (let r = -R; r <= R; r++) {
-      if (Math.abs(q + r) > R) continue
-      let type = 'herbe'
-      if (r === 0) type = 'riviere'
-      tuiles.set(cle(q, r), { q, r, type, decor: null })
-    }
-  }
+  for (const [q, r] of disque(R)) tuiles.set(cle(q, r), { q, r, type: r === 0 ? 'riviere' : 'herbe', decor: null })
   for (const [q, r] of PONTS) tuiles.get(cle(q, r)).type = 'pont'
   for (const [q, r] of FORET) tuiles.get(cle(q, r)).type = 'foret'
   for (const [q, r, modele] of REMPARTS) Object.assign(tuiles.get(cle(q, r)), { type: 'rempart', decor: modele })
@@ -61,7 +40,6 @@ export function tuileEn(x, z) {
 export const praticable = (t) => !!t && (t.type === 'herbe' || t.type === 'foret' || t.type === 'pont')
 
 // Tuiles atteignables depuis le premier départ (parcours en largeur) : les balises n'apparaissent que là.
-const VOISINS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]]
 function atteignables() {
   const vues = new Set([cle(...DEPARTS[0])])
   const file = [DEPARTS[0]]
@@ -78,12 +56,7 @@ const ATTEIGNABLES = atteignables()
 
 /** Un cercle de rayon `rayon` centré en (x, z) tient-il entièrement sur du praticable ? */
 export function positionLibre(x, z, rayon) {
-  if (!praticable(tuileEn(x, z))) return false
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2
-    if (!praticable(tuileEn(x + Math.cos(a) * rayon, z + Math.sin(a) * rayon))) return false
-  }
-  return true
+  return cercleLibre(x, z, rayon, (px, pz) => praticable(tuileEn(px, pz)))
 }
 
 /** Hauteur du sol sous le joueur (le pont fait une petite bosse). */

@@ -1,7 +1,9 @@
-// Salon : les manettes rejoignent la partie (de 1 à 4 joueurs), J1 choisit une partie sur le plateau ou un mini-jeu seul.
+// Salon : les manettes rejoignent la partie (de 1 à 4 joueurs), J1 choisit une partie sur le plateau ou un mini-jeu seul,
+// et le kit de personnages.
 import { useEffect, useRef, useState } from 'react'
 import { lireEntrees, nomAppareil, MODE_CLAVIER } from './commun/entrees.js'
-import { AVATARS, COULEURS_JOUEURS } from './commun/avatars.js'
+import { COULEURS_JOUEURS } from './commun/avatars.js'
+import { useKit, changerKit, avatarJoueur, nomKit } from './commun/kit.js'
 import { MINIJEUX } from './minijeux/index.js'
 import Plateau from './plateau/Plateau.jsx'
 import { creerPlateau, finMinijeu } from './plateau/logique.js'
@@ -19,6 +21,8 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
   const choixRef = useRef(choix)
   choixRef.current = choix
   const stickJ1 = useRef(0)
+  const stickKit = useRef(0)
+  const kit = useKit()
 
   useEffect(() => {
     let id
@@ -43,6 +47,11 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
         setChoix(n)
       }
       stickJ1.current = sens
+      // … et le kit de personnages avec le stick (haut / bas)
+      const sy = liste[0] ? etats.get(liste[0])?.y ?? 0 : 0
+      const sensY = sy > 0.6 ? 1 : sy < -0.6 ? -1 : 0
+      if (sensY && sensY !== stickKit.current) changerKit()
+      stickKit.current = sensY
       id = requestAnimationFrame(tick)
     }
     id = requestAnimationFrame(tick)
@@ -57,6 +66,9 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
           <button key={m.id} className={i === choix ? 'actif' : ''} onClick={() => setChoix(i)}>{m.nom}</button>
         ))}
       </div>
+      <button className="choix-kit" onClick={() => changerKit()}>
+        Personnages : <b>{nomKit(kit)}</b> <span>(stick ↑ ↓ pour changer)</span>
+      </button>
       <div className="places">
         {[0, 1, 2, 3].map((i) => {
           const app = inscrits[i]
@@ -65,7 +77,7 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
               <div className="numero">J{i + 1}</div>
               {app ? (
                 <>
-                  <div className="avatar">{AVATARS[i].nom}</div>
+                  <div className="avatar">{avatarJoueur(i, kit).nom}</div>
                   <div className="appareil">{nomAppareil(app)}</div>
                 </>
               ) : (
@@ -96,7 +108,7 @@ export default function App() {
   const plateauRef = useRef(null)
 
   const lancer = (liste) => {
-    const joueurs = liste.map((appareil, i) => ({ appareil, avatar: AVATARS[i], couleur: COULEURS_JOUEURS[i] }))
+    const joueurs = liste.map((appareil, i) => ({ appareil, couleur: COULEURS_JOUEURS[i] }))
     const mode = MODES[choix].id
     if (mode === 'plateau') plateauRef.current = creerPlateau(joueurs, MINIJEUX.map((m) => m.id))
     setPartie({ mode, joueurs, numero: (partie?.numero ?? 0) + 1, minijeu: null })
@@ -135,7 +147,11 @@ export default function App() {
         onTermine={(classement, choixFin) => {
           console.info('Classement', classement)
           if (choixFin === 'rejouer') setPartie({ ...partie, numero: partie.numero + 1 })
-          else setPartie(null)
+          else if (choixFin === 'passer') {
+            // Mini-jeu passé : on enchaîne sur le suivant
+            const i = MINIJEUX.findIndex((m) => m.id === partie.mode)
+            setPartie({ ...partie, mode: MINIJEUX[(i + 1) % MINIJEUX.length].id, numero: partie.numero + 1 })
+          } else setPartie(null)
         }}
       />
     )

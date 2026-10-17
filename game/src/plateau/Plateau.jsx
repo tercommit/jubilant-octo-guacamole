@@ -5,6 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { majPlateau, joueurActif } from './logique.js'
 import { lireEntrees } from '../commun/entrees.js'
+import { changerKit, avatarJoueur } from '../commun/kit.js'
 import { Ile, Cases, Vanille, Pion, Fleches, Camera } from './Scene.jsx'
 import Hud from './Hud.jsx'
 
@@ -16,17 +17,21 @@ function Boucle({ plateauRef, setHud, onMinijeu, onQuitter }) {
     for (const e of evts) {
       if (e.type === 'minijeu') return onMinijeu(e.id)
       if (e.type === 'quitter') return onQuitter()
+      if (e.type === 'kit') changerKit()
     }
     accu.current += dt
     if (evts.length > 0 || accu.current > 0.1) {
       accu.current = 0
       const actif = joueurActif(p)
+      const m = p.message
       setHud({
-        phase: p.phase, etape: p.etape, pause: p.pause, tour: p.tour, tours: p.tours, choixTours: p.choixTours,
-        de: p.de, pas: p.pas, message: p.message?.texte, minijeu: p.minijeu, ordre: p.ordre, classement: p.classement,
+        phase: p.phase, etape: p.etape, menu: p.menu && { ...p.menu }, minijeuPasse: p.minijeuPasse,
+        tour: p.tour, tours: p.tours, choixTours: p.choixTours, de: p.de, pas: p.pas,
+        message: m && (m.joueur !== null ? `${avatarJoueur(m.joueur).nom} ${m.texte}` : m.texte),
+        minijeu: p.minijeu, ordre: p.ordre, classement: p.classement,
         actif: actif?.index ?? null,
         joueurs: p.joueurs.map((j) => ({
-          nom: j.avatar.nom, couleur: j.couleur, zarlor: j.zarlor, vanilles: j.vanilles, deOrdre: j.deOrdre, gain: j.gain,
+          nom: avatarJoueur(j.index).nom, couleur: j.couleur, zarlor: j.zarlor, vanilles: j.vanilles, deOrdre: j.deOrdre, gain: j.gain,
         })),
       })
     }

@@ -1,5 +1,5 @@
 // Chargement et préparation des modèles glTF : clonage, recoloration, texture de biome, avatars animés.
-import { useEffect, useMemo, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useGLTF, useTexture, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 import { clone as cloneSquelette } from 'three/addons/utils/SkeletonUtils.js'
@@ -7,6 +7,14 @@ import { url } from './avatars.js'
 
 // Animations jouées une seule fois (la pose finale est conservée)
 const UNE_FOIS = new Set(['Victory', 'Defeat', 'Jump', 'RecieveHit'])
+
+// KayKit : les animations du squelette Rig_Medium portent d'autres noms. Pas d'animation de victoire : il saute de joie.
+const ANIMS_KAYKIT = {
+  Idle: 'Idle_A', Run: 'Running_A', Jump: 'Jump_Full_Short', RecieveHit: 'Hit_A', Victory: 'Jump_Full_Short', Defeat: 'Hit_B',
+}
+const UNE_FOIS_KAYKIT = new Set(['Jump', 'RecieveHit', 'Defeat'])
+// Les KayKit sont plus petits que les Quaternius : même hauteur à l'écran
+const ECHELLE_KAYKIT = 1.45
 
 const PIXEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
 
@@ -35,8 +43,17 @@ export function useModele(chemin, texture = null) {
   }, [scene, tex, texture])
 }
 
+/** Avatar animé, quel que soit son kit. Il se charge à part : changer de kit ne fait pas disparaître la scène. */
+export function Avatar(props) {
+  return (
+    <Suspense fallback={null}>
+      {props.avatar.kit === 'kaykit' ? <AvatarKayKit key={props.avatar.id} {...props} /> : <AvatarQuaternius key={props.avatar.id} {...props} />}
+    </Suspense>
+  )
+}
+
 /** Avatar Quaternius animé et recoloré. */
-export function Avatar({ avatar, animation = 'Idle', echelle = 0.45 }) {
+function AvatarQuaternius({ avatar, animation = 'Idle', echelle = 0.45 }) {
   const groupe = useRef()
   const { scene, animations } = useGLTF(url(avatar.fichier))
   const modele = useMemo(() => {
@@ -68,6 +85,46 @@ export function Avatar({ avatar, animation = 'Idle', echelle = 0.45 }) {
 
   return (
     <group ref={groupe} scale={echelle}>
+      <primitive object={modele} />
+    </group>
+  )
+}
+
+/** Avatar KayKit : texture recolorée, pièces masquées, animations prises dans les fichiers du squelette Rig_Medium. */
+function AvatarKayKit({ avatar, animation = 'Idle', echelle = 0.45 }) {
+  const groupe = useRef()
+  const { scene } = useGLTF(url(avatar.fichier))
+  const general = useGLTF(url('kaykit-adventurers/Rig_Medium_General.glb'))
+  const mouvement = useGLTF(url('kaykit-adventurers/Rig_Medium_MovementBasic.glb'))
+  const tex = useTexture(url(avatar.texture))
+  const modele = useMemo(() => {
+    const c = cloneSquelette(scene)
+    c.traverse((o) => {
+      if (!o.isMesh && !o.isSkinnedMesh) return
+      if (avatar.masquer?.includes(o.name)) { o.visible = false; return }
+      o.castShadow = true
+      const m = o.material.clone()
+      tex.flipY = false
+      tex.colorSpace = THREE.SRGBColorSpace
+      if (m.map) { tex.magFilter = m.map.magFilter; tex.minFilter = m.map.minFilter }
+      m.map = tex
+      o.material = m
+    })
+    return c
+  }, [scene, tex, avatar])
+  const clips = useMemo(() => [...general.animations, ...mouvement.animations], [general, mouvement])
+  const { actions } = useAnimations(clips, groupe)
+
+  useEffect(() => {
+    const a = actions[ANIMS_KAYKIT[animation]] || actions.Idle_A
+    if (!a) return
+    a.reset().fadeIn(0.15).play()
+    if (UNE_FOIS_KAYKIT.has(animation)) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true } else a.setLoop(THREE.LoopRepeat, Infinity)
+    return () => { a.fadeOut(0.15) }
+  }, [animation, actions])
+
+  return (
+    <group ref={groupe} scale={echelle * ECHELLE_KAYKIT}>
       <primitive object={modele} />
     </group>
   )

@@ -3,9 +3,10 @@
 // Pendant la phase « tour », `etape` : lancer → de → pas (→ choix | achat) … → arrive
 import { CONFIG } from './config.js'
 import { CASES, DEPART, distances } from './carte.js'
+import { majPause, OPTIONS_PLATEAU, OPTIONS_MINIJEU } from '../commun/menu.js'
 
 /**
- * @param joueurs [{ appareil, avatar, couleur }]
+ * @param joueurs [{ appareil, couleur }]
  * @param minijeux identifiants des mini-jeux à tirer au sort
  */
 export function creerPlateau(joueurs, minijeux, aleatoire = Math.random) {
@@ -29,7 +30,9 @@ export function creerPlateau(joueurs, minijeux, aleatoire = Math.random) {
     minijeu: null,
     dernierMinijeu: null,
     pause: false,
-    message: null,
+    menu: null,
+    message: null, // { texte, joueur?, reste }
+    minijeuPasse: false,
     attente: 0, // temps passé dans la phase en cours (évite qu'un appui en double saute un écran)
     minuteur: 0,
     sticks: {},
@@ -47,8 +50,9 @@ function tirerVanille(p, loinDe) {
 
 export const joueurActif = (p) => (p.phase === 'tour' ? p.joueurs[p.ordre[p.rang]] : null)
 
-function message(p, texte) {
-  p.message = { texte, reste: CONFIG.dureeMessage }
+/** Message temporaire ; avec `joueur`, le HUD le préfixe du nom de son avatar. */
+function message(p, texte, joueur = null) {
+  p.message = { texte, joueur, reste: CONFIG.dureeMessage }
 }
 
 function changerPhase(p, phase) {
@@ -71,6 +75,7 @@ function sauter(p, vers) {
 
 /** Applique les gains d'un mini-jeu ([{ joueur, place, zarlor }]) et passe au bilan du tour. */
 export function finMinijeu(p, classement) {
+  p.minijeuPasse = classement.every((c) => c.passe)
   for (const j of p.joueurs) j.gain = 0
   for (const c of classement) {
     const j = p.joueurs[c.joueur]
@@ -111,12 +116,18 @@ export function majPlateau(p, dt, entrees) {
     return sens !== avant ? sens : 0
   }
 
-  // Pause : Start de n'importe quel joueur, ou manette déconnectée (pas pendant un mini-jeu, qui gère la sienne)
+  // Menu Start (pas pendant un mini-jeu, qui a le sien). À l'annonce d'un mini-jeu, on peut le passer.
   if (p.phase !== 'reglages' && p.phase !== 'minijeu') {
-    if (p.joueurs.some((j) => !entrees.etats.get(j.appareil)?.connecte)) p.pause = true
-    else if (quelquun('start')) { p.pause = !p.pause; evts.push({ type: 'pause', pause: p.pause }) }
+    const options = p.phase === 'annonceMinijeu' ? OPTIONS_MINIJEU : OPTIONS_PLATEAU
+    const enPause = majPause(p, entrees, evts, options)
+    if (evts.some((e) => e.type === 'passer')) {
+      p.pause = false
+      p.menu = null
+      finMinijeu(p, [])
+      return evts
+    }
+    if (enPause) return evts
   }
-  if (p.pause) return evts
 
   p.attente += dt
   if (p.message && (p.message.reste -= dt) <= 0) p.message = null
@@ -198,7 +209,7 @@ export function majPlateau(p, dt, entrees) {
           j.zarlor -= CONFIG.prixVanille
           j.vanilles++
           p.vanille = tirerVanille(p, j.case)
-          message(p, `${j.avatar.nom} achète une gousse de vanille !`)
+          message(p, 'achète une gousse de vanille !', j.index)
           evts.push({ type: 'achat', joueur: j.index })
           avancer(p, evts)
         } else if (a.b) avancer(p, evts)

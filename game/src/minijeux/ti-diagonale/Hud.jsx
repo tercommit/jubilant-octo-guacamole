@@ -1,5 +1,6 @@
 // Interface du mini-jeu (DOM par-dessus le canvas).
 import { CONFIG } from './config.js'
+import MenuPause from '../../commun/MenuPause.jsx'
 
 const COINS = ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd']
 const PLACES = ['1er', '2e', '3e', '4e']
@@ -9,7 +10,7 @@ const secondes = (s) => `${s.toFixed(1).replace('.', ',')} s`
 
 export default function Hud({ etat, enPartie }) {
   if (!etat) return <div className="hud"><div className="chargement">Chargement du sentier…</div></div>
-  const { phase, pause, temps, decompte, joueurs, classement, finPrete } = etat
+  const { phase, menu, temps, decompte, joueurs, classement, finPrete } = etat
 
   return (
     <div className="hud">
@@ -25,14 +26,14 @@ export default function Hud({ etat, enPartie }) {
         </div>
       ))}
 
-      {phase === 'regles' && (
+      {phase === 'regles' && !menu && (
         <div className="panneau">
           <h1>La Ti Diagonale</h1>
           <p className="regle">Cours jusqu'à l'arrivée&nbsp;! Saute par-dessus les cannes, les ravines et les pics, et gare aux roches de la coulée.</p>
           <div className="commandes">
             <span><b>Stick</b> courir</span>
             <span><b>A</b> sauter</span>
-            <span><b>Start</b> pause</span>
+            <span><b>Start</b> menu</span>
           </div>
           <p className="duree">{CONFIG.duree} secondes max · le premier arrivé gagne</p>
           <div className="prets">
@@ -45,16 +46,10 @@ export default function Hud({ etat, enPartie }) {
         </div>
       )}
 
-      {phase === 'decompte' && <div className="decompte" key={Math.ceil(decompte)}>{Math.ceil(decompte)}</div>}
+      {phase === 'decompte' && !menu && <div className="decompte" key={Math.ceil(decompte)}>{Math.ceil(decompte)}</div>}
       {phase === 'jeu' && CONFIG.duree - temps < 0.8 && <div className="decompte partez">Partez&nbsp;!</div>}
 
-      {pause && (
-        <div className="panneau">
-          <h1>Pause</h1>
-          <p>Appuie sur <b>Start</b> pour reprendre.</p>
-          <p className="petit">Si une manette s'est déconnectée, rallume-la puis appuie sur Start.</p>
-        </div>
-      )}
+      {menu && <MenuPause menu={menu} />}
 
       {phase === 'fin' && classement && (
         <div className="panneau">

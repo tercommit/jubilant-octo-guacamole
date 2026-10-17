@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Clone } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar, useModele } from '../../commun/modeles.jsx'
+import { useAvatar } from '../../commun/kit.js'
 import { CONFIG } from './config.js'
 import { CANNES, MOBILES, PICS, Z_DEPART, Z_ARRIVEE, xMobile, angleCanne, etatPic } from './piste.js'
 import { Bloc } from './Piste.jsx'
@@ -11,6 +12,7 @@ import { Bloc } from './Piste.jsx'
 export function Joueur({ partieRef, index }) {
   const groupe = useRef()
   const [anim, setAnim] = useState('Idle')
+  const avatar = useAvatar(index)
   const j = partieRef.current.joueurs[index]
 
   useFrame(({ clock }) => {
@@ -40,7 +42,7 @@ export function Joueur({ partieRef, index }) {
   return (
     <group ref={groupe}>
       <group>
-        <Avatar avatar={j.avatar} animation={anim} />
+        <Avatar avatar={avatar} animation={anim} />
       </group>
       <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
         <ringGeometry args={[0.42, 0.55, 32]} />

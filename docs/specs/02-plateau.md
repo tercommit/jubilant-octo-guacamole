@@ -32,7 +32,7 @@
 | Choisir la route | Stick vers la flèche, puis A |
 | Acheter la vanille | A acheter · B refuser |
 | Écrans de transition | A (n'importe quel joueur) |
-| Pause | Start |
+| Menu (reprendre, personnages ; à l'annonce du mini-jeu : le passer) | Start |
 
 ## Caméra
 

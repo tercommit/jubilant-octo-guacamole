@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { Clone } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar, useModele } from '../commun/modeles.jsx'
+import { useAvatar } from '../commun/kit.js'
 import { CASES, LIAISONS, DEPART } from './carte.js'
 import { joueurActif } from './logique.js'
 
@@ -173,6 +174,7 @@ export function Pion({ plateauRef, index }) {
   const groupe = useRef()
   const anneau = useRef()
   const [anim, setAnim] = useState('Idle')
+  const avatar = useAvatar(index)
   const j = plateauRef.current.joueurs[index]
 
   useFrame(({ clock }) => {
@@ -201,7 +203,7 @@ export function Pion({ plateauRef, index }) {
   return (
     <group ref={groupe}>
       <group>
-        <Avatar avatar={j.avatar} animation={anim} />
+        <Avatar avatar={avatar} animation={anim} />
       </group>
       <mesh ref={anneau} rotation-x={-Math.PI / 2} position-y={0.04}>
         <ringGeometry args={[0.38, 0.5, 32]} />
