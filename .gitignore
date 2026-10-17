@@ -1,0 +1,3 @@
+.DS_Store
+# Packs d’assets bruts (418 Mo) : le jeu utilise ses copies dans game/public/assets
+assets/

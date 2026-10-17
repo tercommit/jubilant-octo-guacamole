@@ -1,0 +1,82 @@
+:root {
+  --nuit: #1f2a37;
+  --sable: #f4e9d8;
+  --jaune: #f2b134;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--nuit);
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #9fd4e6; }
+
+.minijeu { position: fixed; inset: 0; }
+.hud { position: absolute; inset: 0; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) 16px 12px; }
+.chargement { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--nuit); }
+
+.chrono {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  min-width: 72px; padding: 6px 16px; border-radius: 999px; text-align: center;
+  background: rgba(31, 42, 55, 0.85); color: #fff; font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.chrono.urgent { background: #d9482b; animation: pouls 1s infinite; }
+@keyframes pouls { 50% { transform: translateX(-50%) scale(1.08); } }
+
+.score {
+  position: absolute; display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 8px; border-radius: 12px; background: rgba(255, 255, 255, 0.9);
+  border: 3px solid var(--c); font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.score .pastille { width: 14px; height: 14px; border-radius: 50%; background: var(--c); }
+.score .nom { font-size: 14px; }
+.score .points { font-size: 24px; font-weight: 800; min-width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.coin-hg { top: 12px; left: 12px; }
+.coin-hd { top: 12px; right: 12px; }
+.coin-bg { bottom: 12px; left: 12px; }
+.coin-bd { bottom: 12px; right: 12px; }
+
+.panneau {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 32px)); padding: 24px 28px; border-radius: 18px;
+  background: rgba(244, 233, 216, 0.96); box-shadow: 0 10px 40px rgba(0,0,0,.25); text-align: center;
+}
+.panneau h1 { margin: 0 0 8px; font-size: 30px; }
+.panneau .regle { font-size: 18px; line-height: 1.4; margin: 8px 0 16px; }
+.panneau .duree, .panneau .petit { font-size: 13px; color: #5b6573; }
+.commandes { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.commandes span { background: #fff; padding: 6px 12px; border-radius: 10px; font-size: 14px; }
+.commandes b { display: inline-block; min-width: 22px; padding: 1px 6px; margin-right: 4px; border-radius: 6px; background: var(--nuit); color: #fff; }
+.prets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.pret { padding: 8px; border-radius: 10px; border: 2px dashed var(--c); font-size: 14px; font-weight: 600; }
+.pret.ok { border-style: solid; background: var(--c); color: #fff; }
+
+.decompte {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  font-size: 140px; font-weight: 900; color: #fff; -webkit-text-stroke: 4px var(--nuit);
+  animation: zoom 0.9s ease-out both;
+}
+.decompte.partez { font-size: 90px; color: var(--jaune); }
+@keyframes zoom { from { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } 30% { opacity: 1; } to { transform: translate(-50%, -50%) scale(1); } }
+
+.classement { list-style: none; padding: 0; margin: 12px 0; }
+.classement li {
+  display: grid; grid-template-columns: 44px 1fr auto auto; gap: 12px; align-items: center;
+  margin: 6px 0; padding: 10px 14px; border-radius: 12px; background: #fff; border-left: 8px solid var(--c); text-align: left;
+}
+.classement .rang { font-weight: 900; font-size: 20px; }
+.classement .nom { font-weight: 700; }
+.classement .pts { color: #5b6573; font-size: 14px; }
+.classement .zarlor { font-weight: 800; color: #b07a00; }
+.suite { margin: 8px 0 0; }
+
+.salon { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(#9fd4e6, #6dbe45); text-align: center; overflow: auto; }
+.salon h1 { margin: 0; font-size: clamp(28px, 6vw, 44px); }
+.salon h2 { margin: 4px 0 24px; font-weight: 600; color: #2e5a2f; }
+.places { display: grid; grid-template-columns: repeat(4, minmax(120px, 170px)); gap: 12px; }
+@media (max-width: 640px) { .places { grid-template-columns: repeat(2, minmax(120px, 1fr)); } }
+.place { min-height: 130px; padding: 14px 10px; border-radius: 16px; background: rgba(255,255,255,.55); border: 3px dashed var(--c); display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.place.prise { background: #fff; border-style: solid; }
+.place .numero { font-weight: 900; font-size: 22px; color: var(--c); }
+.place .avatar { font-weight: 700; }
+.place .appareil, .place .attente { font-size: 13px; color: #5b6573; }
+.aide { margin-top: 22px; font-size: 16px; }
+.salon .petit { font-size: 13px; color: #24402a; max-width: 560px; }
+b { font-weight: 800; }
