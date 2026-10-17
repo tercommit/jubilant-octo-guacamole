@@ -31,3 +31,8 @@ public/assets/             modèles utilisés (Kenney, KayKit, Quaternius — CC
 ```
 
 Les textures `*-tropique.png` sont des versions recolorées (vert tropical) des textures d'origine.
+
+## Déploiement
+
+Chaque push sur `main` compile `game/` et le publie sur GitHub Pages (`.github/workflows/pages.yml`).
+Réglage à faire une fois : **Settings → Pages → Source : GitHub Actions**.
