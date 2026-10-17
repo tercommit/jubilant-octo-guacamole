@@ -2,7 +2,8 @@
 import { CONFIG } from './config.js'
 import { construireTuiles, etatTuile, regles, versMonde, DEPARTS } from './carte.js'
 import { deroule, majDeroule } from '../../commun/arene/deroule.js'
-import { creerCoureur, deplacerCoureurs, plusProche } from '../../commun/arene/coureurs.js'
+import { creerCoureur, deplacerCoureurs, plusProche, opsArene } from '../../commun/arene/coureurs.js'
+import { majLutte } from '../../commun/lutte.js'
 import { majPieces } from '../../commun/arene/pieces.js'
 
 /** Secondes de jeu écoulées (0 pendant les règles et le compte à rebours). */
@@ -21,6 +22,7 @@ export function creerPartie(joueurs, aleatoire = Math.random) {
     aleatoire,
   }
   p.regles = regles(p.tuiles, () => horloge(p))
+  p.ops = opsArene(p.regles)
   p.joueurs = joueurs.map((j, i) => creerCoureur(j, i, ...versMonde(...DEPARTS[i]), p.regles))
   return p
 }
@@ -40,6 +42,7 @@ export function majPartie(p, dt, entrees) {
   if (majDeroule(p, dt, entrees, evts) !== 'jeu') return evts
 
   deplacerCoureurs(p, dt, entrees, evts, p.regles)
+  majLutte(p, dt, entrees, evts, p.ops)
   majPieces(p, evts, emplacements(p), {
     nombre: CONFIG.pieces.enPlus + p.joueurs.length * CONFIG.pieces.parJoueur,
     rayon: CONFIG.pieces.rayon,

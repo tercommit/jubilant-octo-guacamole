@@ -17,7 +17,7 @@ Quand le temps est écoulé, ceux qui ne sont pas arrivés sont classés selon l
 |---|---|
 | Joueurs | 1 à 4, chacun pour soi |
 | Durée | **60 s au maximum** (après un compte à rebours de 3 s) ; fin dès que tout le monde est arrivé |
-| Commandes | Stick gauche ou croix : courir · **A** : sauter · Start : menu (voir `03-menu-et-personnages.md`) |
+| Commandes | Stick gauche ou croix : courir · **A** : sauter · **B** : pousser, attraper, lancer (voir `04-lutte.md`) · Start : menu (voir `03-menu-et-personnages.md`) |
 | Victoire | Ordre d'arrivée, puis distance parcourue ; égalité = même place (voir `01-boucle-de-jeu.md`) |
 
 ## Le sentier (de l'avant vers l'arrière)

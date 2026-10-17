@@ -2,7 +2,8 @@
 import { CONFIG } from './config.js'
 import { construireTuiles, etatTuile, regles, versMonde, DEPARTS } from './carte.js'
 import { deroule, majDeroule } from '../../commun/arene/deroule.js'
-import { creerCoureur, deplacerCoureurs, sonner } from '../../commun/arene/coureurs.js'
+import { creerCoureur, deplacerCoureurs, sonner, enJeu, opsArene } from '../../commun/arene/coureurs.js'
+import { majLutte } from '../../commun/lutte.js'
 import { majPieces } from '../../commun/arene/pieces.js'
 
 /** Secondes de jeu écoulées (0 pendant les règles et le compte à rebours). */
@@ -23,6 +24,7 @@ export function creerPartie(joueurs, aleatoire = Math.random) {
     prochaineBombe: CONFIG.bombes.intervalle[1],
     aleatoire,
   }
+  p.ops = opsArene(p.regles)
   p.joueurs = joueurs.map((j, i) => ({ ...creerCoureur(j, i, ...versMonde(...DEPARTS[i]), p.regles), horsJeu: false, retour: 0 }))
   return p
 }
@@ -35,7 +37,8 @@ const sures = (p, delai = 0) => {
 function brulures(p, evts) {
   const { brulure } = CONFIG
   for (const j of p.joueurs) {
-    if (j.horsJeu || j.invincible > 0) continue
+    // porté ou en vol : on ne touche pas le sol (on se brûle en retombant)
+    if (!enJeu(j) || j.invincible > 0) continue
     const t = p.regles.tuileEn(j.x, j.z)
     if (!t || etatTuile(t, horloge(p)) !== 'lave') continue
     j.points = Math.max(0, j.points - brulure.perte)
@@ -68,7 +71,7 @@ function majBombes(p, dt, evts) {
     p.explosions.push({ x: b.x, z: b.z, age: 0 })
     evts.push({ type: 'explosion', x: b.x, z: b.z })
     for (const j of p.joueurs) {
-      if (j.horsJeu || j.invincible > 0) continue
+      if (!enJeu(j) || j.invincible > 0) continue
       const dx = j.x - b.x, dz = j.z - b.z
       if (Math.hypot(dx, dz) < B.rayon) {
         sonner(j, dx || 0.01, dz, B.recul)
@@ -82,7 +85,7 @@ function majBombes(p, dt, evts) {
   if ((p.prochaineBombe -= dt) <= 0) {
     const [min, max] = B.intervalle
     p.prochaineBombe = min + p.aleatoire() * (max - min)
-    const cibles = p.joueurs.filter((j) => !j.horsJeu)
+    const cibles = p.joueurs.filter(enJeu)
     if (cibles.length) {
       const c = cibles[Math.floor(p.aleatoire() * cibles.length)]
       const a = p.aleatoire() * Math.PI * 2, d = p.aleatoire() * B.visee
@@ -100,6 +103,7 @@ export function majPartie(p, dt, entrees) {
   if (majDeroule(p, dt, entrees, evts) !== 'jeu') return evts
 
   deplacerCoureurs(p, dt, entrees, evts, p.regles)
+  majLutte(p, dt, entrees, evts, p.ops)
   brulures(p, evts)
   retours(p, dt)
   majBombes(p, dt, evts)

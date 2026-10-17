@@ -18,7 +18,7 @@ Le premier joueur qui la touche marque **1 point**, puis une nouvelle balise app
 |---|---|
 | Joueurs | 1 à 4, chacun pour soi |
 | Durée | **45 s** (après un compte à rebours de 3 s) |
-| Commandes | Stick gauche ou croix : se déplacer · **A** : sprint · Start : menu (voir `03-menu-et-personnages.md`) |
+| Commandes | Stick gauche ou croix : se déplacer · **A** : sprint · **B** : pousser, attraper, lancer (voir `04-lutte.md`) · Start : menu (voir `03-menu-et-personnages.md`) |
 | Victoire | Le plus de balises ; égalité = même place (voir `01-boucle-de-jeu.md`) |
 
 ## L'arène

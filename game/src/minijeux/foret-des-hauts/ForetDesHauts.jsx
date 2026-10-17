@@ -24,7 +24,7 @@ const JEU = {
   texte: {
     titre: 'Sentier de Mafate',
     regle: "Cours jusqu'à la balise avant les autres ! La forêt te ralentit, la ravine ne se traverse que par les ponts.",
-    commandes: [['Stick', 'se déplacer'], ['A', 'sprint']],
+    commandes: [['Stick', 'se déplacer'], ['A', 'sprint'], ['B', 'pousser · attraper · lancer']],
     resume: '1 balise = 1 point',
     unite: ['balise', 'balises'],
     chargement: 'Chargement du cirque…',

@@ -10,7 +10,8 @@ Party game de plateau en 3D low poly (Three.js + React Three Fiber). Le **platea
 - **« Fuis la coulée »** (Volcan) : pièces à ramasser en fuyant la lave et les bombes
 
 Deux kits de personnages au choix (Quaternius ou KayKit), et un menu Start pour passer un mini-jeu :
-voir `docs/specs/03-menu-et-personnages.md`.
+voir `docs/specs/03-menu-et-personnages.md`. Dans tous les mini-jeux, **B** sert à pousser, attraper et
+lancer les autres joueurs : voir `docs/specs/04-lutte.md`.
 
 ## Lancer
 
@@ -35,6 +36,7 @@ src/
   commun/kit.js            kit de personnages choisi (Quaternius / KayKit), mémorisé
   commun/modeles.jsx       chargement glTF, recoloration, avatars animés (deux kits)
   commun/menu.js           menu Start (logique) ; MenuPause.jsx pour l'affichage
+  commun/lutte.js          pousser, porter, jeter entre joueurs (tous les mini-jeux)
   commun/gains.js          zarlor gagnés selon la place
   commun/arene/            socle des mini-jeux d'arène : déroulé, déplacements, pièces, rendu, HUD
   plateau/                 le plateau : cases (carte.js), logique des tours (logique.js), rendu 3D, HUD

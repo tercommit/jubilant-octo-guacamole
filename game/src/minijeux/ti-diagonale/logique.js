@@ -2,6 +2,7 @@
 import { CONFIG } from './config.js'
 import { GAINS } from '../../commun/gains.js'
 import { majPause, OPTIONS_MINIJEU } from '../../commun/menu.js'
+import { LUTTE, champsLutte, libreLutte, majLutte } from '../../commun/lutte.js'
 import {
   Z_DEPART, Z_ARRIVEE, DEPARTS_X, DEPARTS_ARRIERE, CANNES, PICS, COULEE, POINTS_PASSAGE,
   support, xMobile, angleCanne, etatPic, progression,
@@ -17,6 +18,7 @@ export function creerPartie(joueurs, aleatoire = Math.random) {
     sol: true, mobile: null, depuisSol: 0, tampon: 0,
     etourdi: 0, invincible: 0, tombe: 0,
     passage: 0, progression: 0, arrive: null, vitesse: 0, pret: false,
+    ...champsLutte(),
   }))
   return {
     phase: 'regles', // regles → decompte → jeu → fin
@@ -58,6 +60,8 @@ function majJoueur(p, j, e, ap, dt, evts) {
     if (j.tombe <= 0) { j.tombe = 0; reapparaitre(j) }
     return
   }
+  // porté par un autre joueur : c'est lui qui nous déplace (voir commun/lutte.js)
+  if (j.portePar !== null) { j.vitesse = 0; return }
   j.etourdi = Math.max(0, j.etourdi - dt)
   j.invincible = Math.max(0, j.invincible - dt)
   j.tampon = ap.a ? CONFIG.tamponSaut : Math.max(0, j.tampon - dt)
@@ -65,12 +69,13 @@ function majJoueur(p, j, e, ap, dt, evts) {
   // Vitesse horizontale : stick (le vecteur d'entrée est déjà de norme ≤ 1) + recul
   let vx = 0, vz = 0
   const amp = Math.hypot(e.x, e.y)
+  const vitesse = CONFIG.vitesse * (j.porte !== null ? LUTTE.porter.ralenti : 1)
   if (j.etourdi === 0 && amp > 0) {
-    vx = e.x * CONFIG.vitesse
-    vz = e.y * CONFIG.vitesse
+    vx = e.x * vitesse
+    vz = e.y * vitesse
     j.angle = Math.atan2(e.x, e.y)
   }
-  j.vitesse = j.etourdi === 0 ? CONFIG.vitesse * amp : 0
+  j.vitesse = j.etourdi === 0 ? vitesse * amp : 0
   vx += j.kx
   vz += j.kz
   const amorti = Math.exp(-5 * dt)
@@ -131,7 +136,7 @@ function majJoueur(p, j, e, ap, dt, evts) {
 }
 
 function obstacles(p, j, evts) {
-  if (j.invincible > 0 || j.tombe > 0 || j.arrive !== null) return
+  if (j.invincible > 0 || j.tombe > 0 || j.arrive !== null || j.portePar !== null) return
   const r = CONFIG.rayonJoueur
 
   // Cannes à sucre : segment qui tourne autour de son centre
@@ -163,6 +168,33 @@ function obstacles(p, j, evts) {
     if (j.y < 2 * R * 0.85 && Math.hypot(j.x - ro.x, j.z - ro.z) < r + R) {
       return toucher(j, Math.sign(j.x - ro.x) * 0.5, 1, evts)
     }
+  }
+}
+
+/** Pousser, porter, jeter sur la piste (voir commun/lutte.js) : on peut envoyer les autres dans la ravine. */
+function opsPiste(evts) {
+  const r = CONFIG.rayonJoueur
+  return {
+    actif: (j) => j.tombe === 0 && j.arrive === null,
+    deplacer(j, dx, dz) {
+      if (j.y <= -0.3) return
+      j.x = Math.max(-CONFIG.demiLargeur + r, Math.min(CONFIG.demiLargeur - r, j.x + dx))
+      j.z = Math.min(DEPARTS_ARRIERE, j.z + dz)
+    },
+    sonner(j, dx, dz) {
+      const n = Math.hypot(dx, dz) || 1
+      j.kx = (dx / n) * LUTTE.choc.force
+      j.kz = (dz / n) * LUTTE.choc.force
+      j.etourdi = LUTTE.choc.etourdi
+      j.invincible = LUTTE.choc.invincible
+      if (j.sol) { j.vy = 3; j.sol = false }
+      evts.push({ type: 'touche', joueur: j.index, x: j.x, z: j.z })
+    },
+    // le joueur jeté part en cloche, avec la physique de la piste (il peut tomber dans la ravine)
+    lancer(j, fx, fz) {
+      Object.assign(j, { vy: 7, kx: fx * 14, kz: fz * 14, etourdi: LUTTE.jet.etourdi, sol: false, mobile: null, depuisSol: CONFIG.coyote })
+    },
+    hauteurPortee: (porteur) => porteur.y + 1.15,
   }
 }
 
@@ -216,10 +248,11 @@ export function majPartie(p, dt, entrees) {
     majJoueur(p, j, etat(j) || { x: 0, y: 0 }, appui(j), dt, evts)
     obstacles(p, j, evts)
   }
+  majLutte(p, dt, entrees, evts, opsPiste(evts))
 
   // Bousculades : séparation des cercles, entre joueurs à la même hauteur
   const d = CONFIG.rayonJoueur * 2
-  const enCourse = p.joueurs.filter((j) => j.tombe === 0 && j.arrive === null)
+  const enCourse = p.joueurs.filter((j) => j.tombe === 0 && j.arrive === null && libreLutte(j))
   for (let a = 0; a < enCourse.length; a++) {
     for (let b = a + 1; b < enCourse.length; b++) {
       const A = enCourse[a], B = enCourse[b]

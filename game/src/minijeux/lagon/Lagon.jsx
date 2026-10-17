@@ -16,7 +16,7 @@ const JEU = {
   texte: {
     titre: 'Le trésor de La Buse',
     regle: "Ramasse les pièces d'or avant que la marée ne recouvre l'îlot ! Dans l'eau, on avance moins vite.",
-    commandes: [['Stick', 'se déplacer'], ['A', 'sprint']],
+    commandes: [['Stick', 'se déplacer'], ['A', 'sprint'], ['B', 'pousser · attraper · lancer']],
     resume: `1 pièce = 1 point · le coffre vaut ${CONFIG.coffre.valeur}`,
     unite: ['pièce', 'pièces'],
     chargement: 'Chargement du lagon…',

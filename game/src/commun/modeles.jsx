@@ -6,13 +6,18 @@ import { clone as cloneSquelette } from 'three/addons/utils/SkeletonUtils.js'
 import { url } from './avatars.js'
 
 // Animations jouées une seule fois (la pose finale est conservée)
-const UNE_FOIS = new Set(['Victory', 'Defeat', 'Jump', 'RecieveHit'])
+const UNE_FOIS = new Set(['Victory', 'Defeat', 'Jump', 'RecieveHit', 'Pousser', 'Porte'])
+
+// Lutte (commun/lutte.js) : animations du pack Quaternius
+const ANIMS_QUATERNIUS = { Pousser: 'Punch', Porter: 'Run_Carry', PorterArret: 'Walk_Carry', Porte: 'Jump' }
 
 // KayKit : les animations du squelette Rig_Medium portent d'autres noms. Pas d'animation de victoire : il saute de joie.
+// Le pack gratuit n'a pas d'animation « porter » : le porteur court normalement.
 const ANIMS_KAYKIT = {
   Idle: 'Idle_A', Run: 'Running_A', Jump: 'Jump_Full_Short', RecieveHit: 'Hit_A', Victory: 'Jump_Full_Short', Defeat: 'Hit_B',
+  Pousser: 'Throw', Porter: 'Running_A', PorterArret: 'Idle_B', Porte: 'Jump_Idle',
 }
-const UNE_FOIS_KAYKIT = new Set(['Jump', 'RecieveHit', 'Defeat'])
+const UNE_FOIS_KAYKIT = new Set(['Jump', 'RecieveHit', 'Defeat', 'Pousser'])
 // Les KayKit sont plus petits que les Quaternius : même hauteur à l'écran
 const ECHELLE_KAYKIT = 1.45
 
@@ -76,7 +81,7 @@ function AvatarQuaternius({ avatar, animation = 'Idle', echelle = 0.45 }) {
   const { actions } = useAnimations(animations, groupe)
 
   useEffect(() => {
-    const a = actions[animation] || actions.Idle
+    const a = actions[ANIMS_QUATERNIUS[animation] ?? animation] || actions.Idle
     if (!a) return
     a.reset().fadeIn(0.15).play()
     if (UNE_FOIS.has(animation)) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true }

@@ -2,9 +2,11 @@
 import { CONFIG } from './config.js'
 import { positionLibre, facteurVitesse, positionDepart, tirerBalise, hauteurSol } from './carte.js'
 import { deroule, majDeroule } from '../../commun/arene/deroule.js'
-import { creerCoureur, deplacerCoureurs, plusProche } from '../../commun/arene/coureurs.js'
+import { creerCoureur, deplacerCoureurs, plusProche, opsArene } from '../../commun/arene/coureurs.js'
+import { majLutte } from '../../commun/lutte.js'
 
 const REGLES = { config: CONFIG, libre: positionLibre, facteur: facteurVitesse, hauteur: hauteurSol }
+const OPS = opsArene(REGLES)
 
 /**
  * @param {{appareil: string, couleur: string}[]} joueurs
@@ -38,6 +40,7 @@ export function majPartie(p, dt, entrees) {
   if (etape !== 'jeu') return evts
 
   deplacerCoureurs(p, dt, entrees, evts, REGLES)
+  majLutte(p, dt, entrees, evts, OPS)
 
   // Balise : si deux joueurs la touchent dans la même image, le point va au plus proche
   const bal = p.balise

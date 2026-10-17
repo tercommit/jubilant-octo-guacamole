@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Avatar } from '../modeles.jsx'
 import { useAvatar } from '../kit.js'
+import { animationLutte } from '../lutte.js'
 
 /** `sprint` : { duree, recharge } pour la jauge. */
 export function Joueur({ partieRef, index, sprint }) {
@@ -35,6 +36,7 @@ export function Joueur({ partieRef, index, sprint }) {
 
     let voulue = 'Idle'
     if (p.phase === 'fin') voulue = p.classement?.find((c) => c.joueur === index)?.place === 1 ? 'Victory' : 'Defeat'
+    else if (animationLutte(jj)) voulue = animationLutte(jj)
     else if (jj.etourdi > 0) voulue = 'RecieveHit'
     else if (p.phase === 'jeu' && jj.vitesse > 0.1) voulue = 'Run'
     if (voulue !== anim) setAnim(voulue)

@@ -33,6 +33,7 @@ export default function Hud({ etat, enPartie }) {
           <div className="commandes">
             <span><b>Stick</b> courir</span>
             <span><b>A</b> sauter</span>
+            <span><b>B</b> pousser · attraper · lancer</span>
             <span><b>Start</b> menu</span>
           </div>
           <p className="duree">{CONFIG.duree} secondes max · le premier arrivé gagne</p>

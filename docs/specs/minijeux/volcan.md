@@ -20,7 +20,7 @@ C'est le miroir du Lagon : au Lagon, l'arène rétrécit vers le centre ; au Vol
 |---|---|
 | Joueurs | 1 à 4, chacun pour soi |
 | Durée | **45 s** (après un compte à rebours de 3 s) |
-| Commandes | Stick : se déplacer · **A** : sprint · Start : menu |
+| Commandes | Stick : se déplacer · **A** : sprint · **B** : pousser, attraper, lancer (voir `04-lutte.md`) · Start : menu |
 | Victoire | Le plus de pièces ; égalité = même place (voir `01-boucle-de-jeu.md`) |
 
 ## L'arène
