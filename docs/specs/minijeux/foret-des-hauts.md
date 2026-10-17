@@ -16,7 +16,7 @@ Le premier joueur qui la touche marque **1 point**, puis une nouvelle balise app
 
 | | |
 |---|---|
-| Joueurs | 2 à 4, chacun pour soi |
+| Joueurs | 1 à 4, chacun pour soi |
 | Durée | **45 s** (après un compte à rebours de 3 s) |
 | Commandes | Stick gauche ou croix : se déplacer · **A** : sprint · Start : pause |
 | Victoire | Le plus de balises ; égalité = même place (voir `01-boucle-de-jeu.md`) |

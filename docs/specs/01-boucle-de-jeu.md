@@ -5,7 +5,7 @@
 ## Déroulé d'une partie
 
 1. **Préparation**
-   - 2 à 4 joueurs rejoignent la partie en appuyant sur un bouton de leur manette, puis choisissent leur avatar.
+   - 1 à 4 joueurs rejoignent la partie en appuyant sur un bouton de leur manette, puis choisissent leur avatar.
    - Choix du nombre de tours : 10, 15 ou 20.
    - Chaque joueur commence avec **10 zarlor** et **0 vanille**.
    - L'ordre de jeu est tiré par un lancer de dé ; le plus haut commence.
@@ -33,6 +33,7 @@
 | 4 | 10 | 5 | 2 | 0 |
 | 3 | 10 | 5 | 0 | — |
 | 2 | 10 | 3 | — | — |
+| 1 (solo) | 10 | — | — | — |
 
 En cas d'égalité, les joueurs ex æquo reçoivent tous le gain de la meilleure place.
 

@@ -1,5 +1,6 @@
 // Mini-jeu « Sentier de Mafate » (Forêt des Hauts).
 // Entrée : joueurs [{ appareil, avatar, couleur }]. Sortie : onTermine(classement, choix) avec choix 'rejouer' | 'menu'.
+// enPartie : lancé depuis le plateau (l'écran de fin propose alors de revenir au plateau).
 import { Suspense, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -40,7 +41,7 @@ function Boucle({ partieRef, effetsRef, setHud, onTermine }) {
   return null
 }
 
-export default function ForetDesHauts({ joueurs, onTermine }) {
+export default function ForetDesHauts({ joueurs, onTermine, enPartie = false }) {
   const partieRef = useRef(null)
   if (!partieRef.current) partieRef.current = creerPartie(joueurs)
   const effetsRef = useRef([])
@@ -65,7 +66,7 @@ export default function ForetDesHauts({ joueurs, onTermine }) {
           <Boucle partieRef={partieRef} effetsRef={effetsRef} setHud={setHud} onTermine={onTermine} />
         </Suspense>
       </Canvas>
-      <Hud etat={hud} />
+      <Hud etat={hud} enPartie={enPartie} />
     </div>
   )
 }

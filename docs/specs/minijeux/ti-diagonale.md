@@ -15,7 +15,7 @@ Quand le temps est écoulé, ceux qui ne sont pas arrivés sont classés selon l
 
 | | |
 |---|---|
-| Joueurs | 2 à 4, chacun pour soi |
+| Joueurs | 1 à 4, chacun pour soi |
 | Durée | **60 s au maximum** (après un compte à rebours de 3 s) ; fin dès que tout le monde est arrivé |
 | Commandes | Stick gauche ou croix : courir · **A** : sauter · Start : pause |
 | Victoire | Ordre d'arrivée, puis distance parcourue ; égalité = même place (voir `01-boucle-de-jeu.md`) |

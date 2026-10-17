@@ -1,17 +1,14 @@
-// Lancement autonome des mini-jeux : les manettes rejoignent la partie, J1 choisit le mini-jeu, puis on joue.
+// Salon : les manettes rejoignent la partie (de 1 à 4 joueurs), J1 choisit une partie sur le plateau ou un mini-jeu seul.
 import { useEffect, useRef, useState } from 'react'
 import { lireEntrees, nomAppareil, MODE_CLAVIER } from './commun/entrees.js'
 import { AVATARS, COULEURS_JOUEURS } from './commun/avatars.js'
-import ForetDesHauts from './minijeux/foret-des-hauts/ForetDesHauts.jsx'
-import TiDiagonale from './minijeux/ti-diagonale/TiDiagonale.jsx'
+import { MINIJEUX } from './minijeux/index.js'
+import Plateau from './plateau/Plateau.jsx'
+import { creerPlateau, finMinijeu } from './plateau/logique.js'
 
 const PARAMS = new URLSearchParams(window.location.search)
-const MIN_JOUEURS = PARAMS.has('solo') ? 1 : 2
 
-const MINIJEUX = [
-  { id: 'foret-des-hauts', nom: 'Sentier de Mafate', Composant: ForetDesHauts },
-  { id: 'ti-diagonale', nom: 'La Ti Diagonale', Composant: TiDiagonale },
-]
+const MODES = [{ id: 'plateau', nom: 'Partie sur le plateau' }, ...MINIJEUX]
 
 function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
   const [appareils, setAppareils] = useState([])
@@ -34,14 +31,14 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
         const deja = liste.includes(app)
         if (a.a && !deja && liste.length < 4) liste = [...liste, app]
         else if (a.b && deja) liste = liste.filter((x) => x !== app)
-        else if (a.start && deja && liste[0] === app && liste.length >= MIN_JOUEURS) { lancerRef.current(liste); return }
+        else if (a.start && deja && liste[0] === app) { lancerRef.current(liste); return }
       }
       if (liste !== etatRef.current) { etatRef.current = liste; setInscrits(liste) }
-      // J1 choisit le mini-jeu avec le stick (gauche / droite)
+      // J1 choisit le mode avec le stick (gauche / droite)
       const sx = liste[0] ? etats.get(liste[0])?.x ?? 0 : 0
       const sens = sx > 0.6 ? 1 : sx < -0.6 ? -1 : 0
       if (sens && sens !== stickJ1.current) {
-        const n = (choixRef.current + sens + MINIJEUX.length) % MINIJEUX.length
+        const n = (choixRef.current + sens + MODES.length) % MODES.length
         choixRef.current = n
         setChoix(n)
       }
@@ -56,7 +53,7 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
     <div className="salon">
       <h1>Plateau Réunion</h1>
       <div className="choix-minijeu">
-        {MINIJEUX.map((m, i) => (
+        {MODES.map((m, i) => (
           <button key={m.id} className={i === choix ? 'actif' : ''} onClick={() => setChoix(i)}>{m.nom}</button>
         ))}
       </div>
@@ -79,9 +76,9 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
         })}
       </div>
       <p className="aide">
-        {inscrits.length >= MIN_JOUEURS
-          ? <>J1 : <b>←&nbsp;→</b> choisir le mini-jeu · <b>Start</b> lancer · <b>B</b> pour quitter sa place</>
-          : <>Il faut au moins {MIN_JOUEURS} joueur{MIN_JOUEURS > 1 ? 's' : ''} avec une manette.</>}
+        {inscrits.length >= 1
+          ? <>J1 : <b>←&nbsp;→</b> choisir · <b>Start</b> lancer{inscrits.length === 1 ? ' en solo' : ''} · <b>B</b> pour quitter sa place</>
+          : <>Appuie sur <b>A</b> de ta manette pour rejoindre la partie.</>}
       </p>
       <p className="petit">
         {appareils.length === 0 && 'Aucune manette détectée : branche-la ou connecte-la en Bluetooth, puis appuie sur un bouton.'}
@@ -93,24 +90,51 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
 
 export default function App() {
   const [inscrits, setInscrits] = useState([])
-  const [choix, setChoix] = useState(Math.max(0, MINIJEUX.findIndex((m) => m.id === PARAMS.get('jeu'))))
-  const [partie, setPartie] = useState(null) // { joueurs, numero, minijeu }
+  const [choix, setChoix] = useState(Math.max(0, MODES.findIndex((m) => m.id === PARAMS.get('jeu'))))
+  // { mode: 'plateau' | id de mini-jeu, joueurs, numero, minijeu (pendant une partie : mini-jeu en cours) }
+  const [partie, setPartie] = useState(null)
+  const plateauRef = useRef(null)
 
-  const lancer = (liste) => setPartie({
-    numero: (partie?.numero ?? 0) + 1,
-    minijeu: MINIJEUX[choix],
-    joueurs: liste.map((appareil, i) => ({ appareil, avatar: AVATARS[i], couleur: COULEURS_JOUEURS[i] })),
-  })
+  const lancer = (liste) => {
+    const joueurs = liste.map((appareil, i) => ({ appareil, avatar: AVATARS[i], couleur: COULEURS_JOUEURS[i] }))
+    const mode = MODES[choix].id
+    if (mode === 'plateau') plateauRef.current = creerPlateau(joueurs, MINIJEUX.map((m) => m.id))
+    setPartie({ mode, joueurs, numero: (partie?.numero ?? 0) + 1, minijeu: null })
+  }
+
+  if (partie?.mode === 'plateau') {
+    if (partie.minijeu) {
+      const { Composant } = MINIJEUX.find((m) => m.id === partie.minijeu)
+      return (
+        <Composant
+          key={partie.numero}
+          joueurs={partie.joueurs}
+          enPartie
+          onTermine={(classement) => {
+            finMinijeu(plateauRef.current, classement)
+            setPartie({ ...partie, minijeu: null })
+          }}
+        />
+      )
+    }
+    return (
+      <Plateau
+        plateauRef={plateauRef}
+        onMinijeu={(id) => setPartie({ ...partie, minijeu: id, numero: partie.numero + 1 })}
+        onQuitter={() => { plateauRef.current = null; setPartie(null) }}
+      />
+    )
+  }
 
   if (partie) {
-    const { Composant } = partie.minijeu
+    const { Composant } = MINIJEUX.find((m) => m.id === partie.mode)
     return (
       <Composant
         key={partie.numero}
         joueurs={partie.joueurs}
-        onTermine={(classement, choix) => {
+        onTermine={(classement, choixFin) => {
           console.info('Classement', classement)
-          if (choix === 'rejouer') setPartie({ ...partie, numero: partie.numero + 1 })
+          if (choixFin === 'rejouer') setPartie({ ...partie, numero: partie.numero + 1 })
           else setPartie(null)
         }}
       />

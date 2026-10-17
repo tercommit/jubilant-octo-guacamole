@@ -4,7 +4,7 @@ import { CONFIG } from './config.js'
 const COINS = ['coin-hg', 'coin-hd', 'coin-bg', 'coin-bd']
 const PLACES = ['1er', '2e', '3e', '4e']
 
-export default function Hud({ etat }) {
+export default function Hud({ etat, enPartie }) {
   if (!etat) return <div className="hud"><div className="chargement">Chargement du cirque…</div></div>
   const { phase, pause, temps, decompte, joueurs, classement, finPrete } = etat
 
@@ -66,7 +66,9 @@ export default function Hud({ etat }) {
               </li>
             ))}
           </ol>
-          {finPrete && <p className="suite"><b>A</b> rejouer · <b>B</b> changer de joueurs</p>}
+          {finPrete && (enPartie
+            ? <p className="suite"><b>A</b> retour au plateau</p>
+            : <p className="suite"><b>A</b> rejouer · <b>B</b> changer de joueurs</p>)}
         </div>
       )}
     </div>

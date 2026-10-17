@@ -5,7 +5,7 @@
 ## Pitch
 
 Un party game de plateau en 3D low poly, jouable dans le navigateur, façon Mario Party, qui se passe à La Réunion.
-De 2 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'île, s'affrontent dans des mini-jeux
+De 1 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'île, s'affrontent dans des mini-jeux
 (lagon, volcan, forêt des Hauts, kartier créole…) et collectionnent des **gousses de vanille**, achetées avec des **zarlor**.
 
 ## Public
@@ -26,7 +26,7 @@ De 2 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'î
 | Sujet | Décision |
 |---|---|
 | Mode de jeu | **Même écran** (local), pas de réseau en V1 |
-| Joueurs | **2 à 4 humains**, pas de bots |
+| Joueurs | **1 à 4 humains** (solo possible), pas de bots |
 | Durée | Nombre de tours choisi au lancement : **10** (~25 min), **15** ou **20** |
 | Plateforme | **Mobile d'abord** (navigateur sur téléphone et tablette), puis ordinateur |
 | Commandes | **Une manette par joueur, obligatoire sur tous les supports** (Gamepad API) |
@@ -42,7 +42,7 @@ De 2 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'î
 - L'écran sert uniquement à **afficher** le jeu : il n'y a pas de commandes tactiles en jeu.
 - **Tactile et souris** restent possibles dans les menus (écran titre, réglages), en secours.
 - **Écran d'association** au lancement : chaque joueur appuie sur un bouton de sa manette pour rejoindre la partie
-  (de 2 à 4 joueurs), puis choisit son avatar avec cette manette.
+  (de 1 à 4 joueurs), puis choisit son avatar avec cette manette.
 - **Manette déconnectée en cours de partie :** le jeu se met en pause et attend qu'elle soit reconnectée.
 - **Schéma de boutons unique** pour tout le jeu : stick ou croix pour se déplacer, A pour valider ou agir,
   B pour annuler ou pour l'action secondaire. Aucun mini-jeu n'utilise plus de 2 boutons plus le stick.
