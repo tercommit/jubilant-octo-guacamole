@@ -1,17 +1,27 @@
-// Lancement autonome du mini-jeu : les manettes rejoignent la partie, puis on joue.
+// Lancement autonome des mini-jeux : les manettes rejoignent la partie, J1 choisit le mini-jeu, puis on joue.
 import { useEffect, useRef, useState } from 'react'
 import { lireEntrees, nomAppareil, MODE_CLAVIER } from './commun/entrees.js'
 import { AVATARS, COULEURS_JOUEURS } from './commun/avatars.js'
 import ForetDesHauts from './minijeux/foret-des-hauts/ForetDesHauts.jsx'
+import TiDiagonale from './minijeux/ti-diagonale/TiDiagonale.jsx'
 
-const MIN_JOUEURS = new URLSearchParams(window.location.search).has('solo') ? 1 : 2
+const PARAMS = new URLSearchParams(window.location.search)
+const MIN_JOUEURS = PARAMS.has('solo') ? 1 : 2
 
-function Salon({ inscrits, setInscrits, onLancer }) {
+const MINIJEUX = [
+  { id: 'foret-des-hauts', nom: 'Sentier de Mafate', Composant: ForetDesHauts },
+  { id: 'ti-diagonale', nom: 'La Ti Diagonale', Composant: TiDiagonale },
+]
+
+function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
   const [appareils, setAppareils] = useState([])
   const etatRef = useRef(inscrits)
   etatRef.current = inscrits
   const lancerRef = useRef(onLancer)
   lancerRef.current = onLancer
+  const choixRef = useRef(choix)
+  choixRef.current = choix
+  const stickJ1 = useRef(0)
 
   useEffect(() => {
     let id
@@ -27,16 +37,29 @@ function Salon({ inscrits, setInscrits, onLancer }) {
         else if (a.start && deja && liste[0] === app && liste.length >= MIN_JOUEURS) { lancerRef.current(liste); return }
       }
       if (liste !== etatRef.current) { etatRef.current = liste; setInscrits(liste) }
+      // J1 choisit le mini-jeu avec le stick (gauche / droite)
+      const sx = liste[0] ? etats.get(liste[0])?.x ?? 0 : 0
+      const sens = sx > 0.6 ? 1 : sx < -0.6 ? -1 : 0
+      if (sens && sens !== stickJ1.current) {
+        const n = (choixRef.current + sens + MINIJEUX.length) % MINIJEUX.length
+        choixRef.current = n
+        setChoix(n)
+      }
+      stickJ1.current = sens
       id = requestAnimationFrame(tick)
     }
     id = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(id)
-  }, [setInscrits])
+  }, [setInscrits, setChoix])
 
   return (
     <div className="salon">
       <h1>Plateau Réunion</h1>
-      <h2>Mini-jeu : Sentier de Mafate</h2>
+      <div className="choix-minijeu">
+        {MINIJEUX.map((m, i) => (
+          <button key={m.id} className={i === choix ? 'actif' : ''} onClick={() => setChoix(i)}>{m.nom}</button>
+        ))}
+      </div>
       <div className="places">
         {[0, 1, 2, 3].map((i) => {
           const app = inscrits[i]
@@ -57,7 +80,7 @@ function Salon({ inscrits, setInscrits, onLancer }) {
       </div>
       <p className="aide">
         {inscrits.length >= MIN_JOUEURS
-          ? <>J1 : appuie sur <b>Start</b> pour lancer · <b>B</b> pour quitter sa place</>
+          ? <>J1 : <b>←&nbsp;→</b> choisir le mini-jeu · <b>Start</b> lancer · <b>B</b> pour quitter sa place</>
           : <>Il faut au moins {MIN_JOUEURS} joueur{MIN_JOUEURS > 1 ? 's' : ''} avec une manette.</>}
       </p>
       <p className="petit">
@@ -70,16 +93,19 @@ function Salon({ inscrits, setInscrits, onLancer }) {
 
 export default function App() {
   const [inscrits, setInscrits] = useState([])
-  const [partie, setPartie] = useState(null) // { joueurs, numero }
+  const [choix, setChoix] = useState(Math.max(0, MINIJEUX.findIndex((m) => m.id === PARAMS.get('jeu'))))
+  const [partie, setPartie] = useState(null) // { joueurs, numero, minijeu }
 
   const lancer = (liste) => setPartie({
     numero: (partie?.numero ?? 0) + 1,
+    minijeu: MINIJEUX[choix],
     joueurs: liste.map((appareil, i) => ({ appareil, avatar: AVATARS[i], couleur: COULEURS_JOUEURS[i] })),
   })
 
   if (partie) {
+    const { Composant } = partie.minijeu
     return (
-      <ForetDesHauts
+      <Composant
         key={partie.numero}
         joueurs={partie.joueurs}
         onTermine={(classement, choix) => {
@@ -90,5 +116,5 @@ export default function App() {
       />
     )
   }
-  return <Salon inscrits={inscrits} setInscrits={setInscrits} onLancer={lancer} />
+  return <Salon inscrits={inscrits} setInscrits={setInscrits} choix={choix} setChoix={setChoix} onLancer={lancer} />
 }

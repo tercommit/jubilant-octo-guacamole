@@ -1,5 +1,6 @@
 // Logique pure du mini-jeu (aucune dépendance à React ni à Three.js) : facile à tester.
-import { CONFIG, GAINS } from './config.js'
+import { CONFIG } from './config.js'
+import { GAINS } from '../../commun/gains.js'
 import { positionLibre, facteurVitesse, positionDepart, tirerBalise, hauteurSol } from './carte.js'
 
 /**

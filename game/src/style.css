@@ -80,3 +80,10 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #9fd4
 .aide { margin-top: 22px; font-size: 16px; }
 .salon .petit { font-size: 13px; color: #24402a; max-width: 560px; }
 b { font-weight: 800; }
+
+.choix-minijeu { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 8px 0 24px; }
+.choix-minijeu button {
+  font: inherit; font-weight: 700; font-size: 16px; padding: 10px 18px; border-radius: 999px; cursor: pointer;
+  border: 3px solid #2e5a2f; background: rgba(255,255,255,.55); color: #2e5a2f;
+}
+.choix-minijeu button.actif { background: #2e5a2f; color: #fff; }

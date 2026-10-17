@@ -5,6 +5,9 @@ import * as THREE from 'three'
 import { clone as cloneSquelette } from 'three/addons/utils/SkeletonUtils.js'
 import { url } from './avatars.js'
 
+// Animations jouées une seule fois (la pose finale est conservée)
+const UNE_FOIS = new Set(['Victory', 'Defeat', 'Jump', 'RecieveHit'])
+
 const PIXEL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
 
 /** Clone un modèle statique en remplaçant sa texture (ex. version « tropique ») et en activant les ombres. */
@@ -59,7 +62,7 @@ export function Avatar({ avatar, animation = 'Idle', echelle = 0.45 }) {
     const a = actions[animation] || actions.Idle
     if (!a) return
     a.reset().fadeIn(0.15).play()
-    if (animation === 'Victory' || animation === 'Defeat') { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true }
+    if (UNE_FOIS.has(animation)) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true }
     return () => { a.fadeOut(0.15) }
   }, [animation, actions])
 
