@@ -1,7 +1,7 @@
 # Plateau Réunion — prototype
 
 Party game de plateau en 3D low poly (Three.js + React Three Fiber). Le **plateau** est jouable
-(voir `docs/specs/02-plateau.md`), avec quatre mini-jeux tirés au sort à chaque tour, jouables aussi seuls
+(voir `docs/specs/02-plateau.md`) avec ses cases spéciales (`docs/specs/05-cases.md`), et quatre mini-jeux tirés au sort à chaque tour, jouables aussi seuls
 (fiches dans `docs/specs/minijeux/`) :
 
 - **« Sentier de Mafate »** (Forêt des Hauts) : course d'orientation vers des balises

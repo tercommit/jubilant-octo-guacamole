@@ -5,7 +5,7 @@ import { Clone } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar, useModele } from '../commun/modeles.jsx'
 import { useAvatar } from '../commun/kit.js'
-import { CASES, LIAISONS, DEPART } from './carte.js'
+import { CASES, LIAISONS } from './carte.js'
 import { joueurActif } from './logique.js'
 
 const HAUT_CASE = 0.25
@@ -84,11 +84,50 @@ export function Ile() {
   )
 }
 
+const mat = (color) => new THREE.MeshStandardMaterial({ color, flatShading: true })
 const MAT_CASE = {
-  cote: new THREE.MeshStandardMaterial({ color: '#3C7DE2', flatShading: true }),
-  hauts: new THREE.MeshStandardMaterial({ color: '#2f9e5a', flatShading: true }),
-  depart: new THREE.MeshStandardMaterial({ color: '#F2B134', flatShading: true }),
-  bord: new THREE.MeshStandardMaterial({ color: '#f4e9d8', flatShading: true }),
+  bleue: mat('#3C7DE2'),
+  rouge: mat('#D9483B'),
+  chance: mat('#8E5BD6'),
+  cyclone: mat('#2BB3C0'),
+  depart: mat('#F2B134'),
+}
+// Le rebord indique la zone : clair sur la côte, vert dans les Hauts
+const MAT_BORD = { cote: mat('#f4e9d8'), hauts: mat('#7fc46a') }
+const MAT_SYMBOLE = { blanc: new THREE.MeshBasicMaterial({ color: '#ffffff' }), jaune: new THREE.MeshBasicMaterial({ color: '#FFD84A' }) }
+
+function etoile(branches, R, r) {
+  const s = new THREE.Shape()
+  for (let i = 0; i <= branches * 2; i++) {
+    const a = (i / (branches * 2)) * Math.PI * 2, d = i % 2 ? r : R
+    if (i === 0) s.moveTo(Math.sin(a) * d, Math.cos(a) * d); else s.lineTo(Math.sin(a) * d, Math.cos(a) * d)
+  }
+  return new THREE.ShapeGeometry(s)
+}
+const GEO_SYMBOLE = {
+  barre: new THREE.BoxGeometry(0.75, 0.03, 0.2),
+  etoile: etoile(5, 0.55, 0.24),
+  arc: new THREE.RingGeometry(0.3, 0.42, 20, 1, 0, Math.PI * 1.4),
+  arcPetit: new THREE.RingGeometry(0.1, 0.2, 16, 1, 0, Math.PI * 1.4),
+}
+
+/** Symbole posé sur la case : + bleue, − rouge, étoile chance, tourbillon cyclone (lisible sans les couleurs). */
+function Symbole({ type }) {
+  const y = HAUT_CASE + 0.03
+  if (type === 'bleue' || type === 'rouge') return (
+    <group position-y={y}>
+      <mesh geometry={GEO_SYMBOLE.barre} material={MAT_SYMBOLE.blanc} />
+      {type === 'bleue' && <mesh geometry={GEO_SYMBOLE.barre} material={MAT_SYMBOLE.blanc} rotation-y={Math.PI / 2} />}
+    </group>
+  )
+  if (type === 'chance') return <mesh geometry={GEO_SYMBOLE.etoile} material={MAT_SYMBOLE.jaune} position-y={y} rotation-x={-Math.PI / 2} />
+  if (type === 'cyclone') return (
+    <group position-y={y} rotation-x={-Math.PI / 2}>
+      <mesh geometry={GEO_SYMBOLE.arc} material={MAT_SYMBOLE.blanc} />
+      <mesh geometry={GEO_SYMBOLE.arcPetit} material={MAT_SYMBOLE.blanc} rotation-z={Math.PI} />
+    </group>
+  )
+  return null
 }
 
 export function Cases() {
@@ -106,12 +145,13 @@ export function Cases() {
       ))}
       {CASES.map((c) => (
         <group key={c.id} position={[c.x, 0, c.z]}>
-          <mesh position-y={HAUT_CASE / 2 - 0.02} material={MAT_CASE.bord} receiveShadow castShadow>
+          <mesh position-y={HAUT_CASE / 2 - 0.02} material={MAT_BORD[c.zone]} receiveShadow castShadow>
             <cylinderGeometry args={[0.95, 1, HAUT_CASE - 0.04, 8]} />
           </mesh>
-          <mesh position-y={HAUT_CASE - 0.01} material={c.id === DEPART ? MAT_CASE.depart : MAT_CASE[c.zone]} receiveShadow>
+          <mesh position-y={HAUT_CASE - 0.01} material={MAT_CASE[c.type]} receiveShadow>
             <cylinderGeometry args={[0.78, 0.78, 0.04, 8]} />
           </mesh>
+          <Symbole type={c.type} />
         </group>
       ))}
     </group>

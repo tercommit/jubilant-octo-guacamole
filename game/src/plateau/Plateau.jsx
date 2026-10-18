@@ -27,7 +27,8 @@ function Boucle({ plateauRef, setHud, onMinijeu, onQuitter }) {
       setHud({
         phase: p.phase, etape: p.etape, menu: p.menu && { ...p.menu }, minijeuPasse: p.minijeuPasse,
         tour: p.tour, tours: p.tours, choixTours: p.choixTours, de: p.de, pas: p.pas,
-        message: m && (m.joueur !== null ? `${avatarJoueur(m.joueur).nom} ${m.texte}` : m.texte),
+        message: m && [m.joueur !== null && avatarJoueur(m.joueur).nom, m.texte, m.autre !== null && `${avatarJoueur(m.autre).nom} !`]
+          .filter(Boolean).join(' '),
         minijeu: p.minijeu, ordre: p.ordre, classement: p.classement,
         actif: actif?.index ?? null,
         joueurs: p.joueurs.map((j) => ({

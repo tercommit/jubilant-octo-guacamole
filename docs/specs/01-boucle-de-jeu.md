@@ -18,7 +18,7 @@
    1. lance le dé (**1 à 10**) ;
    2. avance case par case, en choisissant sa direction aux embranchements ;
    3. s'il passe sur la case de la **vanille**, il peut l'acheter (voir plus bas) ;
-   4. subit l'effet de la case d'arrivée (types de cases : à définir plus tard).
+   4. subit l'effet de la case d'arrivée (voir `05-cases.md`).
 2. **Phase mini-jeu.** Une fois que tous les joueurs ont joué :
    1. un mini-jeu est tiré au sort, en évitant de reprendre celui du tour précédent ;
    2. un écran de règles l'explique en une phrase, avec les boutons utilisés ;

@@ -1,5 +1,6 @@
 // Cases du plateau : une boucle de 30 cases autour de l'île, et le Chemin des Hauts qui la coupe par le milieu.
-// Chaque case : { id, x, z, suivants: [id], zone: 'cote' | 'hauts' }. La case 0 est le départ.
+// Chaque case : { id, x, z, suivants: [id], zone: 'cote' | 'hauts', type }. La case 0 est le départ.
+// Types (voir docs/specs/05-cases.md) : 'depart', 'bleue' (+zarlor), 'rouge' (−zarlor), 'chance', 'cyclone'.
 
 const N = 30
 const RX = 15, RZ = 10.5
@@ -8,6 +9,14 @@ const ESPACEMENT = 2.7
 export const DEPART = 0
 const FOURCHE = 4 // embranchement : on continue sur la côte ou on monte dans les Hauts
 const REJOINT = 14
+
+// Cases spéciales de la côte ; les autres sont bleues
+const TYPES_COTE = {
+  3: 'rouge', 6: 'chance', 8: 'rouge', 10: 'cyclone', 12: 'rouge', 17: 'rouge', 19: 'chance',
+  21: 'rouge', 24: 'cyclone', 26: 'rouge', 28: 'chance',
+}
+// Chemin des Hauts, de la fourche vers la côte : plus court, mais plus risqué
+const TYPES_HAUTS = ['bleue', 'rouge', 'bleue', 'chance', 'rouge', 'bleue', 'rouge']
 
 function construire() {
   const cases = Array.from({ length: N }, (_, i) => {
@@ -36,6 +45,12 @@ function construire() {
     precedent = c
   }
   precedent.suivants.push(REJOINT)
+
+  for (const c of cases) {
+    if (c.id === DEPART) c.type = 'depart'
+    else if (c.zone === 'cote') c.type = TYPES_COTE[c.id] ?? 'bleue'
+    else c.type = TYPES_HAUTS[c.id - N] ?? 'bleue'
+  }
   return cases
 }
 

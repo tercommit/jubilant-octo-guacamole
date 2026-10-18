@@ -47,6 +47,12 @@ export default function Hud({ etat }) {
             {CONFIG.tours.map((t, i) => <span key={t} className={i === choixTours ? 'actif' : ''}>{t}</span>)}
           </div>
           <p className="duree">10 tours ≈ 25 minutes · chacun commence avec {CONFIG.zarlorDepart} zarlor</p>
+          <ul className="legende-cases">
+            <li style={{ '--c': '#3C7DE2' }}><b>+</b> +{CONFIG.gainBleue} zarlor</li>
+            <li style={{ '--c': '#D9483B' }}><b>−</b> −{CONFIG.perteRouge} zarlor</li>
+            <li style={{ '--c': '#8E5BD6' }}><b>★</b> chance</li>
+            <li style={{ '--c': '#2BB3C0' }}><b>↻</b> cyclone&nbsp;: on échange sa place</li>
+          </ul>
           <p className="suite"><b>←&nbsp;→</b> choisir · <b>A</b> valider (J1)</p>
         </div>
       )}

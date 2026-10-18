@@ -51,7 +51,7 @@ De 1 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'î
 
 - Bots / joueurs contrôlés par l'ordinateur
 - Forme définitive de l'île (le plateau de la V1 est un circuit simple)
-- Types de cases spéciales (on les définira plus tard)
+- Boutique et objets (les cases spéciales de base sont dans `05-cases.md`)
 - Sons et musique (maloya, séga) : prévus, mais après la V1
 
 ## Contenu visé pour la V1

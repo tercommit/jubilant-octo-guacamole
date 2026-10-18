@@ -9,4 +9,14 @@ export const CONFIG = {
   dureeDe: 0.9, // s d'affichage du résultat du dé
   dureeArrivee: 0.7, // s de pause à l'arrivée avant le joueur suivant
   dureeMessage: 1.8, // s
+  // Cases spéciales (docs/specs/05-cases.md)
+  gainBleue: 3,
+  perteRouge: 3,
+  dureeEffet: 1.8, // s de pause à l'arrivée sur une case qui a un effet
+  chance: [ // tirage pondéré
+    { effet: 'gain', zarlor: 5, poids: 4 },
+    { effet: 'gain', zarlor: 10, poids: 1 },
+    { effet: 'cotisation', zarlor: 2, poids: 2 }, // chaque autre joueur donne 2 zarlor (solo : +5)
+    { effet: 'vanille', poids: 2 }, // le car jaune dépose le joueur 2 cases avant la vanille
+  ],
 }

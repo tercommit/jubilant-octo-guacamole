@@ -1,4 +1,5 @@
-// Logique pure du plateau (aucune dépendance à React ni à Three.js) : réglages, ordre de jeu, tours, vanille, fin.
+// Logique pure du plateau (aucune dépendance à React ni à Three.js) : réglages, ordre de jeu, tours, vanille,
+// cases spéciales, fin.
 // Phases : reglages → ordre → annonceOrdre → tour → annonceMinijeu → minijeu → bilan → (tour suivant | fin)
 // Pendant la phase « tour », `etape` : lancer → de → pas (→ choix | achat) … → arrive
 import { CONFIG } from './config.js'
@@ -31,7 +32,8 @@ export function creerPlateau(joueurs, minijeux, aleatoire = Math.random) {
     dernierMinijeu: null,
     pause: false,
     menu: null,
-    message: null, // { texte, joueur?, reste }
+    message: null, // { texte, joueur?, autre?, reste }
+    fileMessages: [], // messages qui attendent leur tour
     minijeuPasse: false,
     attente: 0, // temps passé dans la phase en cours (évite qu'un appui en double saute un écran)
     minuteur: 0,
@@ -50,9 +52,11 @@ function tirerVanille(p, loinDe) {
 
 export const joueurActif = (p) => (p.phase === 'tour' ? p.joueurs[p.ordre[p.rang]] : null)
 
-/** Message temporaire ; avec `joueur`, le HUD le préfixe du nom de son avatar. */
-function message(p, texte, joueur = null) {
-  p.message = { texte, joueur, reste: CONFIG.dureeMessage }
+/** Message temporaire ; avec `joueur`, le HUD le préfixe du nom de son avatar (et le suffixe de celui d'`autre`). */
+function message(p, texte, joueur = null, autre = null) {
+  const m = { texte, joueur, autre, reste: CONFIG.dureeMessage }
+  if (p.message) p.fileMessages.push(m) // le message en cours reste lisible jusqu'au bout
+  else p.message = m
 }
 
 function changerPhase(p, phase) {
@@ -62,10 +66,76 @@ function changerPhase(p, phase) {
 
 function avancer(p, evts) {
   const j = joueurActif(p)
-  if (p.pas === 0) { p.etape = 'arrive'; p.minuteur = CONFIG.dureeArrivee; return }
+  if (p.pas === 0) {
+    const effet = effetCase(p, j, evts)
+    p.etape = 'arrive'
+    p.minuteur = effet ? CONFIG.dureeEffet : CONFIG.dureeArrivee
+    return
+  }
   const c = CASES[j.case]
   if (c.suivants.length > 1) { p.etape = 'choix'; p.selection = 0; evts.push({ type: 'choix' }); return }
   sauter(p, c.suivants[0])
+}
+
+const hasard = (p, liste) => liste[Math.floor(p.aleatoire() * liste.length)]
+
+/** Effet de la case où le joueur s'arrête (voir docs/specs/05-cases.md). @returns true s'il y en a un */
+function effetCase(p, j, evts) {
+  const type = CASES[j.case].type
+  const autres = p.joueurs.filter((o) => o !== j)
+  let effet = null
+
+  if (type === 'bleue') {
+    j.zarlor += CONFIG.gainBleue
+    message(p, `gagne ${CONFIG.gainBleue} zarlor`, j.index)
+    effet = { gain: CONFIG.gainBleue }
+  } else if (type === 'rouge') {
+    const perte = Math.min(CONFIG.perteRouge, j.zarlor)
+    j.zarlor -= perte
+    message(p, perte ? `perd ${perte} zarlor : kass la tèt !` : "n'a plus rien à perdre…", j.index)
+    effet = { gain: -perte }
+  } else if (type === 'chance') {
+    const total = CONFIG.chance.reduce((t, c) => t + c.poids, 0)
+    let r = p.aleatoire() * total
+    let tirage = CONFIG.chance.find((c) => (r -= c.poids) < 0) ?? CONFIG.chance[0]
+    if (tirage.effet === 'cotisation' && !autres.length) tirage = { effet: 'gain', zarlor: 5 }
+    if (tirage.effet === 'gain') {
+      j.zarlor += tirage.zarlor
+      message(p, tirage.zarlor >= 10 ? `gagne le gros lot du loto : ${tirage.zarlor} zarlor !` : `trouve ${tirage.zarlor} zarlor sous un galet !`, j.index)
+    } else if (tirage.effet === 'cotisation') {
+      for (const o of autres) {
+        const don = Math.min(tirage.zarlor, o.zarlor)
+        o.zarlor -= don
+        j.zarlor += don
+      }
+      message(p, `fête son anniversaire : chacun lui donne ${tirage.zarlor} zarlor !`, j.index)
+    } else if (tirage.effet === 'vanille') {
+      j.case = caseAvant(p, p.vanille, 2)
+      message(p, 'monte dans le car jaune : direction la vanille !', j.index)
+    }
+    effet = { chance: tirage.effet }
+  } else if (type === 'cyclone') {
+    if (autres.length) {
+      // échange de place avec un autre joueur
+      const o = hasard(p, autres)
+      ;[j.case, o.case] = [o.case, j.case]
+      message(p, 'se fait emporter par le cyclone : échange de place avec', j.index, o.index)
+      effet = { avec: o.index }
+    } else {
+      j.case = hasard(p, CASES.filter((c) => c.id !== j.case)).id
+      message(p, 'se fait emporter par le cyclone !', j.index)
+      effet = {}
+    }
+  }
+  if (effet) evts.push({ type: 'case', joueur: j.index, case: type, ...effet })
+  return effet !== null
+}
+
+/** Une case située `n` pas avant `cible` (au hasard s'il y a plusieurs chemins). */
+function caseAvant(p, cible, n) {
+  let c = cible
+  for (let k = 0; k < n; k++) c = hasard(p, CASES.filter((x) => x.suivants.includes(c))).id
+  return c
 }
 
 function sauter(p, vers) {
@@ -130,7 +200,7 @@ export function majPlateau(p, dt, entrees) {
   }
 
   p.attente += dt
-  if (p.message && (p.message.reste -= dt) <= 0) p.message = null
+  if (p.message && (p.message.reste -= dt) <= 0) p.message = p.fileMessages.shift() ?? null
   const pret = p.attente > 0.4
 
   switch (p.phase) {

@@ -9,11 +9,12 @@
 
 ## Les cases
 
-- **La côte** : une boucle de **30 cases** (bleues) qui fait le tour de l'île. La case 0 (jaune) est le départ.
+- **La côte** : une boucle de **30 cases** qui fait le tour de l'île. La case 0 (jaune) est le départ.
 - **Le Chemin des Hauts** : à la case 4, un **embranchement** permet de couper par le milieu de l'île
-  (7 cases vertes) pour rejoindre la côte à la case 14. Il est un peu plus court (8 pas au lieu de 10) :
+  (7 cases au rebord vert) pour rejoindre la côte à la case 14. Il est un peu plus court (8 pas au lieu de 10) :
   il sert surtout à aller chercher la vanille quand elle est de ce côté.
-- Les cases n'ont pas encore d'effet (types de cases : à définir plus tard).
+- Chaque case a un type (bleue, rouge, chance, cyclone) dont l'effet s'applique quand on s'y arrête :
+  voir `05-cases.md`.
 
 ## Déroulé (voir `01-boucle-de-jeu.md`)
 
