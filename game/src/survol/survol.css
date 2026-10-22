@@ -5,10 +5,8 @@
   color: var(--nuit);
 }
 * { box-sizing: border-box; }
-html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #a9d8ea; }
+html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #9fd4e6; }
 .survol { position: fixed; inset: 0; touch-action: none; }
-
-.chargement { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 700; pointer-events: none; }
 
 .bandeau {
   position: absolute; top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px;
@@ -32,13 +30,5 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #a9d8
   font-size: 13px; text-align: center; display: flex; flex-direction: column; gap: 2px; width: max-content; max-width: calc(100% - 24px);
   pointer-events: none;
 }
-.aide .credit { font-size: 11px; opacity: .75; }
 .aide .tactile { display: none; }
 @media (pointer: coarse) { .aide .tactile { display: inline; } .aide .souris { display: none; } }
-
-.lieu {
-  padding: 2px 8px; border-radius: 8px; background: rgba(255, 255, 255, .88); white-space: nowrap;
-  font-size: 12px; font-weight: 600; box-shadow: 0 1px 4px rgba(0, 0, 0, .2); pointer-events: none; text-align: center;
-}
-.lieu.sommet { background: rgba(90, 30, 16, .88); color: #fff; }
-.lieu small { display: block; font-size: 10px; font-weight: 500; opacity: .85; }

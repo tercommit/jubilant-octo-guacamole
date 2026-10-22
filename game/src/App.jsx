@@ -97,7 +97,7 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
         {MODE_CLAVIER && ' Mode clavier : J1 = ZQSD/WASD + Espace (Échap = Start), J2 = flèches + Entrée (Retour arrière = Start).'}
       </p>
       <p className="liens">
-        <a href="./survol.html">Survoler La Réunion en 3D</a> · <a href="./expo.html">Voir l’expo des assets 3D</a>
+        <a href="./survol.html">Survoler le plateau</a> · <a href="./expo.html">Voir l’expo des assets 3D</a>
       </p>
     </div>
   )

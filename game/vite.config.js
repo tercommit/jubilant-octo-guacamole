@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    // Trois pages : le jeu, l'expo des assets et le survol de l'île
+    // Trois pages : le jeu, l'expo des assets et le survol du plateau
     rollupOptions: { input: { jeu: 'index.html', expo: 'expo.html', survol: 'survol.html' } },
   },
 })

@@ -26,9 +26,8 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
   `?jeu=lagon` ou `?jeu=volcan` présélectionne le jeu ; `?kit=kaykit` impose le kit.
 - **Expo des assets** : `expo.html` (lien en bas du salon) montre en 3D chaque modèle utilisé, son pack,
   sa licence et les jeux où il apparaît. Catalogue : `src/expo/catalogue.js` (à compléter quand un modèle est ajouté).
-- **Survol de La Réunion** : `survol.html` montre l'île en 3D à partir du vrai relief (MNT Copernicus GLO-30),
-  sans personnage : glisser pour se déplacer, clic droit / deux doigts pour tourner, molette / pincer pour zoomer.
-  Données dans `public/assets/reunion/`, produites par `cartes/export_survol.py`.
+- **Survol du plateau** : `survol.html` montre l'île du plateau telle qu'en jeu, sans pion ni partie :
+  glisser pour se déplacer, clic droit / deux doigts pour tourner, molette / pincer pour zoomer.
 - **Développement sans manette** : ajouter `?clavier` à l'URL (J1 = ZQSD/WASD + Espace, Échap = Start ;
   J2 = flèches + Entrée, Retour arrière = Start).
 
@@ -53,7 +52,7 @@ src/
     Arene.jsx              décor 3D
   minijeux/ti-diagonale/   parcours d'obstacles (config, piste, logique, rendu, HUD)
   expo/                    page « Expo des assets » (catalogue.js + vitrine 3D)
-  survol/                  page « Survol de La Réunion » (relief 3D de l'île)
+  survol/                  page « Survol du plateau » (le décor du plateau, sans partie)
 public/assets/             modèles utilisés (Kenney, KayKit, Quaternius — CC0)
 ```
 
