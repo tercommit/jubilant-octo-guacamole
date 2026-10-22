@@ -1,11 +1,11 @@
-// Éléments de scène communs aux arènes : joueurs (avec jauge de sprint), effets de prise, caméra fixe.
+// Éléments de scène communs aux arènes : joueurs (avec jauge de sprint s'il y en a une), effets de prise, caméra fixe.
 import { useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Avatar } from '../modeles.jsx'
 import { useAvatar } from '../kit.js'
 import { animationLutte } from '../lutte.js'
 
-/** `sprint` : { duree, recharge } pour la jauge. */
+/** `sprint` : { duree, recharge } pour la jauge (facultatif : sans sprint, pas de jauge). */
 export function Joueur({ partieRef, index, sprint }) {
   const groupe = useRef()
   const jauge = useRef()
@@ -13,7 +13,7 @@ export function Joueur({ partieRef, index, sprint }) {
   const [anim, setAnim] = useState('Idle')
   const avatar = useAvatar(index)
   const j = partieRef.current.joueurs[index]
-  const totalRecharge = sprint.duree + sprint.recharge
+  const totalRecharge = sprint ? sprint.duree + sprint.recharge : 1
 
   useFrame(({ clock }) => {
     const p = partieRef.current
@@ -30,7 +30,7 @@ export function Joueur({ partieRef, index, sprint }) {
     groupe.current.userData.angle = a
     groupe.current.children[0].rotation.y = a
 
-    const charge = 1 - jj.recharge / totalRecharge
+    const charge = sprint ? 1 - jj.recharge / totalRecharge : 0
     jauge.current.scale.setScalar(Math.max(0.001, charge))
     anneau.current.material.opacity = jj.sprint > 0 ? 1 : 0.85
 
@@ -38,6 +38,7 @@ export function Joueur({ partieRef, index, sprint }) {
     if (p.phase === 'fin') voulue = p.classement?.find((c) => c.joueur === index)?.place === 1 ? 'Victory' : 'Defeat'
     else if (animationLutte(jj)) voulue = animationLutte(jj)
     else if (jj.etourdi > 0) voulue = 'RecieveHit'
+    else if (jj.sol === false && p.phase === 'jeu') voulue = 'Jump'
     else if (p.phase === 'jeu' && jj.vitesse > 0.1) voulue = 'Run'
     if (voulue !== anim) setAnim(voulue)
   })
@@ -60,7 +61,7 @@ export function Joueur({ partieRef, index, sprint }) {
   )
 }
 
-/** Onde de couleur quand un joueur marque. `effetsRef.current` : [{x, z, couleur, t0}] */
+/** Onde de couleur quand un joueur marque. `effetsRef.current` : [{x, y (facultatif), z, couleur, t0}] */
 export function Effets({ effetsRef, hauteur }) {
   const pool = useRef([])
   useFrame(({ clock }) => {
@@ -71,7 +72,7 @@ export function Effets({ effetsRef, hauteur }) {
       m.visible = !!e
       if (!e) return
       const k = (now - e.t0) / 0.6
-      m.position.set(e.x, hauteur + 0.05 + k * 0.8, e.z)
+      m.position.set(e.x, (e.y ?? hauteur) + 0.05 + k * 0.8, e.z)
       m.scale.setScalar(0.5 + k * 2.5)
       m.material.opacity = 1 - k
       m.material.color.set(e.couleur)

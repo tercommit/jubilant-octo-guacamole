@@ -8,6 +8,11 @@ export const JEUX = {
   'ti-diagonale': 'La Ti Diagonale',
   lagon: 'Le trésor de La Buse',
   volcan: 'Fuis la coulée',
+  galets: 'Les galets traîtres',
+  portes: 'Les portes des cases',
+  bascules: 'Les bascules',
+  cerceaux: 'Les cerceaux du lagon',
+  margouillat: 'La queue du margouillat',
 }
 const PARTOUT = Object.keys(JEUX)
 
@@ -65,10 +70,10 @@ export const PACKS = [
       { fichier: 'kenney-platformer/coin-gold.glb', nom: 'Pièce (zarlor)', jeux: ['lagon', 'volcan'] },
       { fichier: 'kenney-platformer/chest.glb', nom: 'Coffre de La Buse', jeux: ['lagon'] },
       { fichier: 'kenney-platformer/bomb.glb', nom: 'Bombe volcanique', jeux: ['volcan'] },
-      { fichier: 'kenney-platformer/flag.glb', nom: 'Balise', jeux: ['foret-des-hauts', 'ti-diagonale'] },
+      { fichier: 'kenney-platformer/flag.glb', nom: 'Balise', jeux: ['foret-des-hauts', 'ti-diagonale', 'galets', 'portes', 'bascules'] },
       { fichier: 'kenney-platformer/trap-spikes-large.glb', nom: 'Piège à pics', jeux: ['ti-diagonale'] },
-      { fichier: 'kenney-platformer/tree.glb', nom: 'Arbre', jeux: ['plateau', 'ti-diagonale'] },
-      { fichier: 'kenney-platformer/tree-pine.glb', nom: 'Filao', jeux: ['plateau', 'ti-diagonale'] },
+      { fichier: 'kenney-platformer/tree.glb', nom: 'Arbre', jeux: ['plateau', 'ti-diagonale', 'portes', 'cerceaux', 'margouillat'] },
+      { fichier: 'kenney-platformer/tree-pine.glb', nom: 'Filao', jeux: ['plateau', 'ti-diagonale', 'cerceaux', 'margouillat'] },
       { fichier: 'kenney-platformer/rocks.glb', nom: 'Cailloux', jeux: ['plateau', 'ti-diagonale'] },
       { fichier: 'kenney-platformer/grass.glb', nom: 'Touffe d’herbe', jeux: ['ti-diagonale'] },
       { fichier: 'kenney-platformer/flowers.glb', nom: 'Fleurs', jeux: ['ti-diagonale'] },

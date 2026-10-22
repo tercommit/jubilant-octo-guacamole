@@ -8,8 +8,10 @@ export const deroule = (config) => ({
   phase: 'regles', // regles → decompte → jeu → fin
   pause: false,
   menu: null,
+  duree: config.duree,
   temps: config.duree,
   decompte: config.decompte,
+  t: 0, // secondes écoulées depuis le début du compte à rebours : anime les obstacles
 })
 
 /**
@@ -27,12 +29,14 @@ export function majDeroule(p, dt, entrees, evts) {
   }
   if (p.phase === 'decompte') {
     p.decompte -= dt
+    p.t += dt
     if (p.decompte <= 0) { p.phase = 'jeu'; evts.push({ type: 'partez' }); return 'depart' }
     return null
   }
   if (p.phase !== 'jeu') return null
 
   p.temps -= dt
+  p.t += dt
   if (p.temps <= 0) {
     p.temps = 0
     p.phase = 'fin'
@@ -43,13 +47,19 @@ export function majDeroule(p, dt, entrees, evts) {
   return 'jeu'
 }
 
-/** Classement aux points : les ex æquo partagent la meilleure place et le meilleur gain. */
-export function classementPoints(joueurs) {
-  const tri = [...joueurs].sort((a, b) => b.points - a.points)
+/**
+ * Classement selon un score (le plus haut gagne) : les ex æquo partagent la meilleure place et le meilleur gain.
+ * `extra(j)` ajoute des champs à chaque ligne (detail affiché à l'écran de fin, elimine…).
+ */
+export function classer(joueurs, score, extra = () => ({})) {
+  const tri = [...joueurs].sort((a, b) => score(b) - score(a))
   const gains = GAINS[joueurs.length] || GAINS[4]
   let place = 0
   return tri.map((j, i) => {
-    if (i === 0 || j.points < tri[i - 1].points) place = i + 1
-    return { joueur: j.index, points: j.points, place, zarlor: gains[place - 1] ?? 0 }
+    if (i === 0 || score(j) < score(tri[i - 1])) place = i + 1
+    return { joueur: j.index, points: j.points, place, zarlor: gains[place - 1] ?? 0, ...extra(j) }
   })
 }
+
+/** Classement aux points. */
+export const classementPoints = (joueurs) => classer(joueurs, (j) => j.points)
