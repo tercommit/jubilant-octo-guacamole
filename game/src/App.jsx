@@ -96,6 +96,7 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
         {appareils.length === 0 && 'Aucune manette détectée : branche-la ou connecte-la en Bluetooth, puis appuie sur un bouton.'}
         {MODE_CLAVIER && ' Mode clavier : J1 = ZQSD/WASD + Espace (Échap = Start), J2 = flèches + Entrée (Retour arrière = Start).'}
       </p>
+      <a className="lien-expo" href="./expo.html">Voir l’expo des assets 3D</a>
     </div>
   )
 }
