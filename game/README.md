@@ -24,6 +24,8 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
   J1 choisit « Partie sur le plateau » ou un mini-jeu avec le stick (gauche / droite), puis appuie sur **Start**.
   Stick haut / bas : kit de personnages. `?jeu=plateau`, `?jeu=foret-des-hauts`, `?jeu=ti-diagonale`,
   `?jeu=lagon` ou `?jeu=volcan` présélectionne le jeu ; `?kit=kaykit` impose le kit.
+- **Expo des assets** : `expo.html` (lien en bas du salon) montre en 3D chaque modèle utilisé, son pack,
+  sa licence et les jeux où il apparaît. Catalogue : `src/expo/catalogue.js` (à compléter quand un modèle est ajouté).
 - **Développement sans manette** : ajouter `?clavier` à l'URL (J1 = ZQSD/WASD + Espace, Échap = Start ;
   J2 = flèches + Entrée, Retour arrière = Start).
 
@@ -47,6 +49,7 @@ src/
     logique.js             logique pure (sans rendu)
     Arene.jsx              décor 3D
   minijeux/ti-diagonale/   parcours d'obstacles (config, piste, logique, rendu, HUD)
+  expo/                    page « Expo des assets » (catalogue.js + vitrine 3D)
 public/assets/             modèles utilisés (Kenney, KayKit, Quaternius — CC0)
 ```
 

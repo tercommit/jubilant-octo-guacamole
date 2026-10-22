@@ -1,0 +1,61 @@
+:root {
+  --nuit: #1f2a37;
+  --sable: #f4e9d8;
+  --jaune: #f2b134;
+  --vert: #2e5a2f;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--nuit);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: linear-gradient(#9fd4e6, #cfe9c4 600px, var(--sable) 1400px) no-repeat, var(--sable); }
+
+/* La toile couvre l'écran par-dessus la page ; elle ne dessine que dans les vignettes et laisse passer les clics */
+.toile { position: fixed !important; inset: 0; pointer-events: none; }
+
+.expo { max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }
+.expo header { text-align: center; margin-bottom: 8px; }
+.expo h1 { margin: 8px 0; font-size: clamp(30px, 6vw, 46px); }
+.expo header p { max-width: 640px; margin: 0 auto 16px; line-height: 1.5; }
+.retour { display: inline-block; color: var(--vert); font-weight: 600; text-decoration: none; }
+.retour:hover { text-decoration: underline; }
+
+.filtres, .animations { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.animations { justify-content: flex-start; margin: 0 0 12px; }
+.filtres button, .animations button {
+  border: 2px solid var(--nuit); background: #fff; color: var(--nuit); border-radius: 999px;
+  padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.animations button { padding: 4px 12px; font-size: 13px; }
+.filtres button.actif, .animations button.actif { background: var(--nuit); color: #fff; }
+
+.expo section { margin-top: 36px; }
+.expo h2 { margin: 0; font-size: 24px; }
+.credit { margin: 2px 0 6px; font-size: 14px; color: #4a5563; }
+.credit a, footer a { color: var(--vert); }
+.note { margin: 0 0 14px; font-size: 15px; line-height: 1.45; }
+
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.carte { margin: 0; background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0, 0, 0, .08); overflow: hidden; }
+.vue {
+  height: 200px; cursor: grab; touch-action: pan-y;
+  background: radial-gradient(circle at 50% 40%, #fff 0%, #e8f2ef 70%, #d5e6e0 100%);
+}
+.vue:active { cursor: grabbing; }
+.carte figcaption { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; }
+.carte figcaption b { font-size: 16px; }
+.carte code { font-size: 12px; color: #6b7480; overflow-wrap: anywhere; }
+.jeux { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.jeux span { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #e3f0d8; color: var(--vert); }
+.jeux .pas-utilise { background: #eceae4; color: #6b6458; }
+
+.textures .images { display: grid; grid-template-rows: minmax(0, 1fr); height: 200px; overflow: hidden; background: #eef1ee; }
+.textures .images.paire { grid-template-columns: 1fr 1fr; gap: 2px; }
+.textures img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+
+footer { margin-top: 48px; text-align: center; font-size: 14px; color: #4a5563; }
+
+@media (max-width: 480px) {
+  .grille { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vue, .textures .images { height: 150px; }
+  .carte figcaption b { font-size: 14px; }
+}
