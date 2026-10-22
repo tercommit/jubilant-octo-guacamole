@@ -4,8 +4,9 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { MapControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Ile, Cases } from '../plateau/Scene.jsx'
+import { hauteurSol } from '../plateau/ile.js'
 
-/** Garde le point visé au-dessus de l'île et la caméra au-dessus de l'eau. */
+/** Garde le point visé au-dessus de l'île et la caméra au-dessus de l'eau et du relief. */
 function Garde({ controles }) {
   useFrame(({ camera }) => {
     const c = controles.current
@@ -13,7 +14,8 @@ function Garde({ controles }) {
     c.target.x = THREE.MathUtils.clamp(c.target.x, -24, 24)
     c.target.z = THREE.MathUtils.clamp(c.target.z, -18, 18)
     c.target.y = 0
-    if (camera.position.y < 1) camera.position.y = 1
+    const sol = Math.max(hauteurSol(camera.position.x, camera.position.z), 0) + 1
+    if (camera.position.y < sol) camera.position.y = sol
   })
   return null
 }

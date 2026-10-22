@@ -4,15 +4,20 @@
 
 ## L'île
 
-- Une île low poly ovale (la forme définitive viendra plus tard), entourée du lagon.
-- Au milieu, le Piton des Neiges ; des arbres et des rochers un peu partout.
+- La vraie Réunion en low poly : forme et relief tirés du MNT Copernicus GLO-30 (`cartes/export_plateau.py`,
+  1 unité = 2,4 km, altitudes exagérées ×4). On y reconnaît le Piton des Neiges et ses trois cirques,
+  le massif de la Fournaise et la Plaine des Cafres entre les deux. Lagon clair près du rivage.
+- Des arbres dans les bas et les forêts, des rochers en altitude, jamais sur les cases ni les chemins.
 
 ## Les cases
 
-- **La côte** : une boucle de **30 cases** (bleues) qui fait le tour de l'île. La case 0 (jaune) est le départ.
-- **Le Chemin des Hauts** : à la case 4, un **embranchement** permet de couper par le milieu de l'île
-  (7 cases vertes) pour rejoindre la côte à la case 14. Il est un peu plus court (8 pas au lieu de 10) :
-  il sert surtout à aller chercher la vanille quand elle est de ce côté.
+- **La côte** : une boucle de **30 cases** (bleues) qui fait le tour de l'île à quelques kilomètres du rivage.
+  La case 0 (jaune) est le départ, vers Saint-Louis ; on tourne dans le sens Saint-Pierre → Saint-Joseph → Saint-Benoît.
+- **Le Chemin des Hauts** : à la case 4 (Saint-Pierre), un **embranchement** permet de monter par la route
+  des Plaines (Le Tampon, Plaine des Cafres, Plaine des Palmistes : 6 cases vertes) pour rejoindre la côte à la
+  case 16 (Saint-Benoît). Il est plus court (7 pas au lieu de 12) : il sert surtout à aller chercher la vanille
+  quand elle est de ce côté.
+- Les cases et les chemins épousent le relief : le terrain est aplani dessous.
 - Les cases n'ont pas encore d'effet (types de cases : à définir plus tard).
 
 ## Déroulé (voir `01-boucle-de-jeu.md`)

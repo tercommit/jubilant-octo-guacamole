@@ -30,11 +30,11 @@ export const PACKS = [
   {
     id: 'kaykit', nom: 'KayKit Medieval Hexagon Pack', auteur: 'Kay Lousberg',
     lien: 'https://kaylousberg.itch.io/kaykit-medieval-hexagon', licence: 'CC0',
-    note: 'Montagnes et collines, avec la texture recolorée en vert tropical.',
+    note: 'Montagnes et collines de la forêt des Hauts, avec la texture recolorée en vert tropical.',
     modeles: [
-      { fichier: 'kaykit/mountain_A_grass_trees.gltf', nom: 'Montagne boisée A', texture: TEX_KAYKIT, jeux: ['plateau', 'foret-des-hauts'] },
+      { fichier: 'kaykit/mountain_A_grass_trees.gltf', nom: 'Montagne boisée A', texture: TEX_KAYKIT, jeux: ['foret-des-hauts'] },
       { fichier: 'kaykit/mountain_B_grass_trees.gltf', nom: 'Montagne boisée B', texture: TEX_KAYKIT, jeux: ['foret-des-hauts'] },
-      { fichier: 'kaykit/hills_A_trees.gltf', nom: 'Collines boisées', texture: TEX_KAYKIT, jeux: ['plateau', 'foret-des-hauts'] },
+      { fichier: 'kaykit/hills_A_trees.gltf', nom: 'Collines boisées', texture: TEX_KAYKIT, jeux: ['foret-des-hauts'] },
       { fichier: 'kaykit/trees_B_medium.gltf', nom: 'Bosquet', texture: TEX_KAYKIT, jeux: ['foret-des-hauts'] },
     ],
   },

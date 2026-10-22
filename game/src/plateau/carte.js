@@ -1,41 +1,27 @@
 // Cases du plateau : une boucle de 30 cases autour de l'île, et le Chemin des Hauts qui la coupe par le milieu.
-// Chaque case : { id, x, z, suivants: [id], zone: 'cote' | 'hauts' }. La case 0 est le départ.
+// Chaque case : { id, x, y, z, suivants: [id], zone: 'cote' | 'hauts' }. La case 0 est le départ.
+import ILE from './ile.json'
+import { hauteurSol } from './ile.js'
 
-const N = 30
-const RX = 15, RZ = 10.5
-const ESPACEMENT = 2.7
-
+// Tracé tiré de la vraie Réunion (cartes/export_plateau.py) : la côte à quelques kilomètres du rivage,
+// la fourche à Saint-Pierre et le Chemin des Hauts par la route des Plaines jusqu'à Saint-Benoît.
 export const DEPART = 0
-const FOURCHE = 4 // embranchement : on continue sur la côte ou on monte dans les Hauts
-const REJOINT = 14
+const FOURCHE = ILE.fourche // embranchement : on continue sur la côte ou on monte dans les Hauts
+const REJOINT = ILE.rejoint
 
 function construire() {
-  const cases = Array.from({ length: N }, (_, i) => {
-    const a = (i / N) * Math.PI * 2
-    return { id: i, x: RX * Math.sin(a), z: RZ * Math.cos(a), suivants: [(i + 1) % N], zone: 'cote' }
-  })
-
-  // Chemin des Hauts : courbe de Bézier de la fourche à la case où il rejoint la côte
-  const A = cases[FOURCHE], B = cases[REJOINT], C = { x: -1, z: 1 }
-  const point = (t) => ({
-    x: (1 - t) ** 2 * A.x + 2 * (1 - t) * t * C.x + t * t * B.x,
-    z: (1 - t) ** 2 * A.z + 2 * (1 - t) * t * C.z + t * t * B.z,
-  })
-  const echant = Array.from({ length: 201 }, (_, i) => point(i / 200))
-  const cumul = [0]
-  for (let i = 1; i < echant.length; i++) cumul.push(cumul[i - 1] + Math.hypot(echant[i].x - echant[i - 1].x, echant[i].z - echant[i - 1].z))
-  const total = cumul[cumul.length - 1]
-  const n = Math.round(total / ESPACEMENT) - 1
-  let precedent = A
-  for (let k = 1; k <= n; k++) {
-    const cible = (k / (n + 1)) * total
-    const i = cumul.findIndex((c) => c >= cible)
-    const c = { id: cases.length, ...echant[i], suivants: [], zone: 'hauts' }
+  const N = ILE.cote.length
+  const cases = ILE.cote.map(([x, z], i) => ({ id: i, x, z, suivants: [(i + 1) % N], zone: 'cote' }))
+  let precedent = cases[FOURCHE]
+  for (const [x, z] of ILE.hauts) {
+    const c = { id: cases.length, x, z, suivants: [], zone: 'hauts' }
     cases.push(c)
     precedent.suivants.push(c.id)
     precedent = c
   }
   precedent.suivants.push(REJOINT)
+  // Chaque case repose sur le relief
+  for (const c of cases) c.y = Math.max(hauteurSol(c.x, c.z), 0.1)
   return cases
 }
 

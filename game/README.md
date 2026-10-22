@@ -43,7 +43,7 @@ src/
   commun/lutte.js          pousser, porter, jeter entre joueurs (tous les mini-jeux)
   commun/gains.js          zarlor gagnés selon la place
   commun/arene/            socle des mini-jeux d'arène : déroulé, déplacements, pièces, rendu, HUD
-  plateau/                 le plateau : cases (carte.js), logique des tours (logique.js), rendu 3D, HUD
+  plateau/                 le plateau : île (ile.js, ile.json), cases (carte.js), logique des tours (logique.js), rendu 3D, HUD
   minijeux/index.js        liste des mini-jeux (salon et tirage au sort)
   minijeux/foret-des-hauts/, lagon/, volcan/
     config.js              paramètres de jeu (durée, vitesses, sprint…)
