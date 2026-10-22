@@ -79,7 +79,8 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #9fd4
 .place .appareil, .place .attente { font-size: 13px; color: #5b6573; }
 .aide { margin-top: 22px; font-size: 16px; }
 .salon .petit { font-size: 13px; color: #24402a; max-width: 560px; }
-.lien-expo { margin-top: 12px; font-size: 14px; font-weight: 600; color: #24402a; }
+.liens { margin: 12px 0 0; font-size: 14px; font-weight: 600; color: #24402a; }
+.liens a { color: inherit; }
 b { font-weight: 800; }
 
 .choix-minijeu { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 8px 0 24px; }

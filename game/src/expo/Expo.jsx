@@ -97,7 +97,7 @@ export default function Expo() {
     <>
       <main className="expo">
         <header>
-          <a className="retour" href="./">← Retour au jeu</a>
+          <a className="retour" href="./">← Retour au jeu</a> · <a className="retour" href="./survol.html">Survoler l’île en 3D</a>
           <h1>Expo des assets</h1>
           <p>
             Les {total} modèles 3D et les textures qui donnent vie à <b>Plateau Réunion</b>. Tous sont sous licence
