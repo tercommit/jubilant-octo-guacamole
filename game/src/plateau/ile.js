@@ -6,16 +6,8 @@ const { colonnes, lignes, x0, z0, pas, pasZ, y: Y } = ILE.grille
 export const SOL = ILE.sol
 const KM_PAR_HAUTEUR = ILE.kmParUnite / ILE.exageration
 
-const yGrille = (i, j) => Y[Math.min(lignes - 1, Math.max(0, j)) * colonnes + Math.min(colonnes - 1, Math.max(0, i))]
-
 /** Hauteur du relief brut en (x, z), interpolée entre les sommets de la grille. */
-export function hauteurSol(x, z) {
-  const u = (x - x0) / pas, v = (z - z0) / pasZ
-  const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j
-  const haut = yGrille(i, j) * (1 - fu) + yGrille(i + 1, j) * fu
-  const bas = yGrille(i, j + 1) * (1 - fu) + yGrille(i + 1, j + 1) * fu
-  return haut * (1 - fv) + bas * fv
-}
+export const hauteurSol = (x, z) => hauteurRelief(Y, x, z)
 
 /** Altitude réelle (m) correspondant à une hauteur de la scène. */
 export const altitude = (y) => Math.max(0, (y - SOL) * KM_PAR_HAUTEUR * 1000)
@@ -48,16 +40,13 @@ function couleurFace(y, pente, cible) {
 const lisse = (a, b, t) => { const k = Math.min(1, Math.max(0, (t - a) / (b - a))); return k * k * (3 - 2 * k) }
 
 /**
- * Géométrie du relief, aplanie sous les cases et les chemins pour que le plateau y repose.
+ * Relief aplani sous les cases et les chemins pour que le plateau y repose : hauteur de chaque sommet de la grille.
  * cases : [{ x, y, z }] ; segments : [[A, B]] entre deux cases.
  */
-export function geometrieIle(cases, segments) {
-  const g = new THREE.PlaneGeometry(pas * (colonnes - 1), pasZ * (lignes - 1), colonnes - 1, lignes - 1)
-  g.rotateX(-Math.PI / 2) // la ligne 0 (nord) part vers -z
-  g.translate(x0 + (pas * (colonnes - 1)) / 2, 0, z0 + (pasZ * (lignes - 1)) / 2)
-  const pos = g.attributes.position
-  for (let k = 0; k < pos.count; k++) {
-    const x = pos.getX(k), z = pos.getZ(k)
+export function reliefAplani(cases, segments) {
+  const ys = new Float32Array(Y.length)
+  for (let k = 0; k < Y.length; k++) {
+    const x = x0 + (k % colonnes) * pas, z = z0 + Math.floor(k / colonnes) * pasZ
     let y = Y[k], poids = 0, cible = y
     for (const c of cases) {
       const w = 1 - lisse(1.05, 1.6, Math.hypot(x - c.x, z - c.z))
@@ -70,8 +59,26 @@ export function geometrieIle(cases, segments) {
       if (w > poids) { poids = w; cible = A.y + (B.y - A.y) * t }
     }
     if (y >= SOL) y += (cible - 0.03 - y) * poids
-    pos.setY(k, y)
+    ys[k] = y
   }
+  return ys
+}
+
+/** Hauteur d'un relief (brut ou aplani) en (x, z), interpolée entre les sommets de la grille. */
+export function hauteurRelief(ys, x, z) {
+  const h = (i, j) => ys[Math.min(lignes - 1, Math.max(0, j)) * colonnes + Math.min(colonnes - 1, Math.max(0, i))]
+  const u = (x - x0) / pas, v = (z - z0) / pasZ
+  const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j
+  return (h(i, j) * (1 - fu) + h(i + 1, j) * fu) * (1 - fv) + (h(i, j + 1) * (1 - fu) + h(i + 1, j + 1) * fu) * fv
+}
+
+/** Géométrie du relief : ys vient de reliefAplani (la ligne 0 de la grille au nord). */
+export function geometrieIle(ys) {
+  const g = new THREE.PlaneGeometry(pas * (colonnes - 1), pasZ * (lignes - 1), colonnes - 1, lignes - 1)
+  g.rotateX(-Math.PI / 2) // la ligne 0 (nord) part vers -z
+  g.translate(x0 + (pas * (colonnes - 1)) / 2, 0, z0 + (pasZ * (lignes - 1)) / 2)
+  const pos = g.attributes.position
+  for (let k = 0; k < pos.count; k++) pos.setY(k, ys[k])
 
   // Faces à plat, une couleur par triangle
   const plat = g.toNonIndexed()

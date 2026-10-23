@@ -1,13 +1,15 @@
-// Rendu 3D du plateau : l'île (le relief de La Réunion), les cases, la vanille, les pions et la caméra.
+// Rendu 3D du plateau : l'île (le relief de La Réunion) et ses villes, les cases, la vanille, les pions et la caméra.
 import { useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Clone } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar, useModele } from '../commun/modeles.jsx'
 import { useAvatar } from '../commun/kit.js'
-import { CASES, LIAISONS, DEPART } from './carte.js'
+import { CASES, LIAISONS, DEPART, RELIEF } from './carte.js'
 import { geometrieIle, pointsTerre, altitude } from './ile.js'
 import { joueurActif } from './logique.js'
+import { Villes } from './Villes.jsx'
+import { loinDesVilles } from './villes.js'
 
 const HAUT_CASE = 0.25
 
@@ -16,7 +18,7 @@ function hasard(n) {
   return s - Math.floor(s)
 }
 
-// Arbres dans les bas et les forêts, rochers en altitude ; rien sur les cases ni sur les chemins
+// Arbres dans les bas et les forêts, rochers en altitude ; rien sur les cases, les chemins ni les villes
 const DECORS = (() => {
   const pts = pointsTerre()
   const liste = []
@@ -29,7 +31,7 @@ const DECORS = (() => {
   for (let i = 0; liste.length < 70 && i < 3000; i++) {
     const p = pts[Math.floor(hasard(i) * pts.length)]
     const m = altitude(p.y)
-    if (m < 60 || m > 2400 || !loinDuPlateau(p.x, p.z)) continue
+    if (m < 60 || m > 2400 || !loinDuPlateau(p.x, p.z) || !loinDesVilles(p.x, p.z, 0.4)) continue
     const modele = m > 1800 ? 'rocks' : ['tree', 'tree-pine', 'tree', 'tree-pine', 'rocks'][Math.floor(hasard(i + 99) * 5)]
     liste.push({ x: p.x, y: p.y - 0.05, z: p.z, modele, rot: hasard(i + 7) * 6.3, echelle: 0.45 + hasard(i + 3) * 0.35 })
   }
@@ -37,7 +39,7 @@ const DECORS = (() => {
 })()
 
 export function Ile() {
-  const relief = useMemo(() => geometrieIle(CASES, LIAISONS.map(([a, b]) => [CASES[a], CASES[b]])), [])
+  const relief = useMemo(() => geometrieIle(RELIEF), [])
   const modeles = {
     tree: useModele('kenney-platformer/tree.glb'),
     'tree-pine': useModele('kenney-platformer/tree-pine.glb'),
@@ -62,6 +64,7 @@ export function Ile() {
       {DECORS.map((d, i) => (
         <Clone key={i} object={modeles[d.modele]} position={[d.x, d.y, d.z]} rotation-y={d.rot} scale={d.echelle} />
       ))}
+      <Villes />
     </group>
   )
 }

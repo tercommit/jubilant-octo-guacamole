@@ -9,6 +9,29 @@
   le massif de la Fournaise et la Plaine des Cafres entre les deux. Lagon clair près du rivage.
 - Des arbres dans les bas et les forêts, des rochers en altitude, jamais sur les cases ni les chemins.
 
+## Les villes
+
+Dix-huit villes sont posées à leur vraie place (`game/src/plateau/villes.js`), autour de la côte et dans les Hauts.
+Chacune a quelques cases créoles (toit de tôle rouge ou vert), des animaux animés et un élément qui la fait reconnaître :
+
+| Ville | Ce qu'on y voit |
+|---|---|
+| Saint-Denis | cathédrale, mosquée, canons du Barachois |
+| Sainte-Suzanne | le phare de Bel-Air |
+| Saint-André | temple tamoul, champs de canne |
+| Saint-Benoît, Sainte-Rose, Cilaos | leur église (Notre-Dame-des-Laves, Notre-Dame-des-Neiges) |
+| Saint-Pierre | kiosque du front de mer, marché, barques |
+| Saint-Louis | la sucrerie du Gol et sa cheminée, canne et charrette |
+| Saint-Paul | la tombe de La Buse, marché forain |
+| Le Port | un navire et ses tonneaux |
+| Saint-Leu | barques et crabes |
+| Plaine des Cafres | les vaches |
+| Sainte-Marie, Saint-Joseph, Saint-Philippe, Le Tampon, Plaine-des-Palmistes, Hell-Bourg | cases, cultures, cochons, poules, cocotiers, fontaine |
+
+Les éléments se placent seuls autour du centre de la ville, à côté des cases et des chemins, jamais dessus ;
+sur une pente, un bâtiment repose sur un socle de pierre. Modèles : packs Kenney (CC0), voir l'expo des assets.
+Les monuments (église, temple, mosquée, phare, sucrerie, kiosque) sont construits en low poly dans `Villes.jsx`.
+
 ## Les cases
 
 - **La côte** : une boucle de **30 cases** (bleues) qui fait le tour de l'île à quelques kilomètres du rivage.

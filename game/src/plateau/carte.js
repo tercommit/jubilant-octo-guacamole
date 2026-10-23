@@ -1,7 +1,7 @@
 // Cases du plateau : une boucle de 30 cases autour de l'île, et le Chemin des Hauts qui la coupe par le milieu.
 // Chaque case : { id, x, y, z, suivants: [id], zone: 'cote' | 'hauts' }. La case 0 est le départ.
 import ILE from './ile.json'
-import { hauteurSol } from './ile.js'
+import { hauteurSol, reliefAplani, hauteurRelief } from './ile.js'
 
 // Tracé tiré de la vraie Réunion (cartes/export_plateau.py) : la côte à quelques kilomètres du rivage,
 // la fourche à Saint-Pierre et le Chemin des Hauts par la route des Plaines jusqu'à Saint-Benoît.
@@ -29,6 +29,24 @@ export const CASES = construire()
 
 /** Liaisons à dessiner : [de, vers] */
 export const LIAISONS = CASES.flatMap((c) => c.suivants.map((s) => [c.id, s]))
+
+/** Relief de l'île aplani sous les cases et les chemins, et sa hauteur en (x, z). */
+export const RELIEF = reliefAplani(CASES, LIAISONS.map(([a, b]) => [CASES[a], CASES[b]]))
+export const hauteurPlateau = (x, z) => hauteurRelief(RELIEF, x, z)
+
+/** Distance de (x, z) au chemin le plus proche. */
+export function distanceChemin(x, z) {
+  let d = Infinity
+  for (const [a, b] of LIAISONS) {
+    const A = CASES[a], B = CASES[b], dx = B.x - A.x, dz = B.z - A.z
+    const t = Math.min(1, Math.max(0, ((x - A.x) * dx + (z - A.z) * dz) / (dx * dx + dz * dz)))
+    d = Math.min(d, Math.hypot(x - A.x - dx * t, z - A.z - dz * t))
+  }
+  return d
+}
+
+/** Distance de (x, z) au centre de la case la plus proche. */
+export const distanceCase = (x, z) => Math.min(...CASES.map((c) => Math.hypot(c.x - x, c.z - z)))
 
 /** Distance en nombre de cases, dans les deux sens (parcours en largeur). */
 export function distances(depuis) {

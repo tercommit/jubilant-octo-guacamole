@@ -52,7 +52,8 @@ src/
   commun/gains.js          zarlor gagnés selon la place
   commun/arene/            socle des mini-jeux d'arène : déroulé, déplacements, pièces, rendu, HUD
   commun/saut/             socle des mini-jeux à la Fall Guys : saut et chutes, règles (survie, course), caméras, décor
-  plateau/                 le plateau : île (ile.js, ile.json), cases (carte.js), logique des tours (logique.js), rendu 3D, HUD
+  plateau/                 le plateau : île (ile.js, ile.json), cases (carte.js), villes (villes.js, Villes.jsx),
+                           logique des tours (logique.js), rendu 3D, HUD
   minijeux/index.js        liste des mini-jeux (salon et tirage au sort)
   minijeux/foret-des-hauts/, lagon/, volcan/
     config.js              paramètres de jeu (durée, vitesses, sprint…)
@@ -67,7 +68,8 @@ src/
 public/assets/             modèles utilisés (Kenney, KayKit, Quaternius — CC0)
 ```
 
-Les textures `*-tropique.png` sont des versions recolorées (vert tropical) des textures d'origine.
+Les textures `*-tropique.png` sont des versions recolorées (vert tropical) des textures d'origine ;
+`kenney-suburban/Textures/colormap-creole.png` donne aux maisons des villes un toit de tôle rouge.
 Les textures de `kaykit-adventurers/textures/` sont les versions péi des personnages KayKit (voir `avatars-reunion2.pdf`).
 
 ## Déploiement
