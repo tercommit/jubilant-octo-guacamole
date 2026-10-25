@@ -1,7 +1,8 @@
 // Salon : les manettes rejoignent la partie (de 1 à 4 joueurs), J1 choisit une partie sur le plateau ou un mini-jeu seul,
 // et le kit de personnages.
 import { useEffect, useRef, useState } from 'react'
-import { lireEntrees, nomAppareil, MODE_CLAVIER } from './commun/entrees.js'
+import { lireEntrees, nomAppareil, MODE_CLAVIER, MODE_TACTILE, ID_TACTILE } from './commun/entrees.js'
+import Tactile from './commun/Tactile.jsx'
 import { COULEURS_JOUEURS } from './commun/avatars.js'
 import { useKit, changerKit, avatarJoueur, nomKit } from './commun/kit.js'
 import { MINIJEUX } from './minijeux/index.js'
@@ -90,10 +91,11 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
       <p className="aide">
         {inscrits.length >= 1
           ? <>J1 : <b>←&nbsp;→</b> choisir · <b>Start</b> lancer{inscrits.length === 1 ? ' en solo' : ''} · <b>B</b> pour quitter sa place</>
-          : <>Appuie sur <b>A</b> de ta manette pour rejoindre la partie.</>}
+          : <>Appuie sur <b>A</b> de ta manette{MODE_TACTILE && ' ou de l’écran'} pour rejoindre la partie.</>}
       </p>
       <p className="petit">
         {appareils.length === 0 && 'Aucune manette détectée : branche-la ou connecte-la en Bluetooth, puis appuie sur un bouton.'}
+        {MODE_TACTILE && ' Au doigt : stick à gauche, boutons A, B et Start à droite (un joueur par écran).'}
         {MODE_CLAVIER && ' Mode clavier : J1 = ZQSD/WASD + Espace (Échap = Start), J2 = flèches + Entrée (Retour arrière = Start).'}
       </p>
       <p className="liens">
@@ -103,11 +105,9 @@ function Salon({ inscrits, setInscrits, choix, setChoix, onLancer }) {
   )
 }
 
-export default function App() {
+function Ecran({ partie, setPartie }) {
   const [inscrits, setInscrits] = useState([])
   const [choix, setChoix] = useState(Math.max(0, MODES.findIndex((m) => m.id === PARAMS.get('jeu'))))
-  // { mode: 'plateau' | id de mini-jeu, joueurs, numero, minijeu (pendant une partie : mini-jeu en cours) }
-  const [partie, setPartie] = useState(null)
   const plateauRef = useRef(null)
 
   const lancer = (liste) => {
@@ -160,4 +160,17 @@ export default function App() {
     )
   }
   return <Salon inscrits={inscrits} setInscrits={setInscrits} choix={choix} setChoix={setChoix} onLancer={lancer} />
+}
+
+export default function App() {
+  // { mode: 'plateau' | id de mini-jeu, joueurs, numero, minijeu (pendant une partie : mini-jeu en cours) }
+  const [partie, setPartie] = useState(null)
+  // En partie, les commandes tactiles ne s'affichent que si l'écran tactile tient une place
+  const tactile = MODE_TACTILE && (!partie || partie.joueurs.some((j) => j.appareil === ID_TACTILE))
+  return (
+    <>
+      <Ecran partie={partie} setPartie={setPartie} />
+      {tactile && <Tactile />}
+    </>
+  )
 }

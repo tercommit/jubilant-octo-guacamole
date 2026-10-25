@@ -29,18 +29,20 @@ De 1 à 4 joueurs, sur le même écran, avancent sur un plateau inspiré de l'î
 | Joueurs | **1 à 4 humains** (solo possible), pas de bots |
 | Durée | Nombre de tours choisi au lancement : **10** (~25 min), **15** ou **20** |
 | Plateforme | **Mobile d'abord** (navigateur sur téléphone et tablette), puis ordinateur |
-| Commandes | **Une manette par joueur, obligatoire sur tous les supports** (Gamepad API) |
+| Commandes | **Une manette par joueur** (Gamepad API), ou les **commandes tactiles** de l'écran sur mobile |
 | Moteur | **Three.js + React Three Fiber**, assets en glTF/GLB |
 | Monnaie | **Zarlor** |
 | Objectif | **Gousses de vanille** : le joueur qui en a le plus à la fin gagne |
 
-## Commandes : une manette par joueur
+## Commandes : une manette par joueur, ou l'écran tactile
 
 - **Chaque joueur a sa manette**, quel que soit le support (téléphone, tablette, ordinateur, écran branché sur TV).
 - Manettes gérées via la **Gamepad API** du navigateur : Bluetooth sur mobile, USB ou Bluetooth sur ordinateur.
   À tester en priorité : manettes Xbox, PlayStation, Switch Pro et modèles génériques.
-- L'écran sert uniquement à **afficher** le jeu : il n'y a pas de commandes tactiles en jeu.
-- **Tactile et souris** restent possibles dans les menus (écran titre, réglages), en secours.
+- **Commandes tactiles** sur téléphone et tablette : un stick virtuel à gauche, les boutons A, B et Start à droite.
+  L'écran compte comme une manette de plus (un joueur par écran), seul ou avec des manettes branchées.
+  En partie, elles ne s'affichent que si l'écran tactile tient une place.
+- **Tactile et souris** marchent aussi dans les menus (écran titre, réglages).
 - **Écran d'association** au lancement : chaque joueur appuie sur un bouton de sa manette pour rejoindre la partie
   (de 1 à 4 joueurs), puis choisit son avatar avec cette manette.
 - **Manette déconnectée en cours de partie :** le jeu se met en pause et attend qu'elle soit reconnectée.

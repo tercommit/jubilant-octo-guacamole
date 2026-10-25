@@ -153,3 +153,27 @@ b { font-weight: 800; }
 .menu-pause .menu li.actif { border-color: var(--nuit); background: var(--jaune); }
 .menu-pause .menu li.actif small { color: var(--nuit); }
 .menu-pause .alerte { color: #b3261e; font-weight: 700; }
+
+/* Commandes tactiles (voir commun/Tactile.jsx) : au-dessus des fiches des coins bas */
+.tactile { position: fixed; inset: 0; z-index: 10; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.tactile-stick, .tactile-bouton { pointer-events: auto; touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.tactile-stick {
+  position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: max(76px, calc(env(safe-area-inset-bottom) + 64px));
+  width: 128px; height: 128px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(31, 42, 55, 0.25); border: 3px solid rgba(255, 255, 255, 0.6);
+}
+.tactile-pouce { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.tactile-boutons {
+  position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: max(76px, calc(env(safe-area-inset-bottom) + 64px));
+  width: 150px; height: 150px;
+}
+.tactile-bouton {
+  position: absolute; display: grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer;
+  font: inherit; font-weight: 900; color: #fff; border: 3px solid rgba(255, 255, 255, 0.7); box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+.tactile-bouton.presse { transform: scale(0.92); filter: brightness(1.2); }
+.tactile-a { right: 0; bottom: 0; width: 76px; height: 76px; font-size: 28px; background: rgba(46, 138, 70, 0.85); }
+.tactile-b { left: 0; bottom: 44px; width: 60px; height: 60px; font-size: 22px; background: rgba(201, 58, 46, 0.85); }
+.tactile-start { right: 6px; top: -14px; width: 64px; height: 30px; border-radius: 999px; font-size: 13px; background: rgba(31, 42, 55, 0.8); }
+/* le bas du salon reste lisible au-dessus des commandes tactiles */
+body:has(.tactile) .salon { padding-bottom: 240px; }

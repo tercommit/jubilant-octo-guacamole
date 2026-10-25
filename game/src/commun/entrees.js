@@ -1,8 +1,15 @@
-// Entrées : manettes (Gamepad API) + clavier simulé en mode développement (?clavier).
+// Entrées : manettes (Gamepad API), commandes tactiles à l'écran (voir Tactile.jsx)
+// et clavier simulé en mode développement (?clavier).
 // Chaque appareil est exposé sous la même forme : { id, x, y, a, b, start, connecte }.
 // Les fronts (bouton qui vient d'être pressé) sont dans `appuis`.
 
-export const MODE_CLAVIER = new URLSearchParams(window.location.search).has('clavier')
+const PARAMS = new URLSearchParams(window.location.search)
+export const MODE_CLAVIER = PARAMS.has('clavier')
+// Tactile : actif sur les écrans au doigt (téléphone, tablette), forcé avec ?tactile, coupé avec ?tactile=0
+export const MODE_TACTILE = PARAMS.has('tactile')
+  ? PARAMS.get('tactile') !== '0'
+  : !!window.matchMedia?.('(pointer: coarse)').matches
+export const ID_TACTILE = 'tactile'
 
 const ZONE_MORTE = 0.2
 
@@ -24,6 +31,23 @@ if (MODE_CLAVIER) {
   })
   window.addEventListener('keyup', (e) => touches.delete(e.code))
   window.addEventListener('blur', () => touches.clear())
+}
+
+// État des commandes tactiles, écrit par Tactile.jsx
+const tactile = { x: 0, y: 0, a: false, b: false, start: false }
+const frappesTactiles = new Set()
+
+/** Met à jour les commandes tactiles (champs partiels : { x, y } ou { a: true }…). */
+export function majTactile(champs) {
+  for (const k of ['a', 'b', 'start']) if (champs[k] && !tactile[k]) frappesTactiles.add(k)
+  Object.assign(tactile, champs)
+  const n = Math.hypot(tactile.x, tactile.y)
+  if (n < ZONE_MORTE) { tactile.x = 0; tactile.y = 0 } else if (n > 1) { tactile.x /= n; tactile.y /= n }
+}
+
+/** Relâche toutes les commandes tactiles (doigt levé hors de l'écran, page masquée…). */
+export function relacherTactile() {
+  Object.assign(tactile, { x: 0, y: 0, a: false, b: false, start: false })
 }
 
 const precedent = new Map()
@@ -57,6 +81,7 @@ export function lireEntrees() {
   const pads = navigator.getGamepads ? navigator.getGamepads() : []
   for (const gp of pads) if (gp) etats.set(`manette-${gp.index}`, lireManette(gp))
   if (MODE_CLAVIER) for (const c of CLAVIERS) etats.set(c.id, lireClavier(c))
+  if (MODE_TACTILE) etats.set(ID_TACTILE, { id: ID_TACTILE, ...tactile, connecte: true })
 
   const appuis = new Map()
   for (const [id, e] of etats) {
@@ -71,10 +96,16 @@ export function lireEntrees() {
     }
     frappes.clear()
   }
+  if (MODE_TACTILE) {
+    const ap = appuis.get(ID_TACTILE)
+    for (const k of frappesTactiles) ap[k] = true
+    frappesTactiles.clear()
+  }
   return { etats, appuis }
 }
 
 export function nomAppareil(id) {
+  if (id === ID_TACTILE) return 'Écran tactile'
   if (id.startsWith('clavier')) return id === 'clavier-1' ? 'Clavier (ZQSD + Espace)' : 'Clavier (flèches + Entrée)'
   const gp = navigator.getGamepads?.()[Number(id.split('-')[1])]
   return gp ? gp.id.replace(/\(.*?\)/g, '').trim().slice(0, 32) || 'Manette' : 'Manette'

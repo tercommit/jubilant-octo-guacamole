@@ -28,6 +28,9 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
 ```
 
 - Chaque joueur appuie sur **A** de sa manette pour rejoindre la partie (de 1 à 4 : le solo est possible).
+  Sur téléphone et tablette, des **commandes tactiles** s'affichent (stick à gauche, A, B et Start à droite) :
+  l'écran compte comme une manette de plus, utilisable seule ou avec des manettes. `?tactile` les force
+  (ordinateur à écran tactile), `?tactile=0` les masque.
   J1 choisit « Partie sur le plateau » ou un mini-jeu avec le stick (gauche / droite), puis appuie sur **Start**.
   Stick haut / bas : kit de personnages. `?jeu=plateau`, `?jeu=foret-des-hauts`, `?jeu=ti-diagonale`,
   `?jeu=lagon`, `?jeu=volcan`… (l'identifiant d'un mini-jeu, voir `src/minijeux/index.js`) présélectionne le jeu ;
@@ -43,7 +46,8 @@ npm run dev        # puis ouvrir l'URL affichée (aussi accessible depuis un mob
 
 ```
 src/
-  commun/entrees.js        manettes (Gamepad API) + clavier de dev
+  commun/entrees.js        manettes (Gamepad API), écran tactile + clavier de dev
+  commun/Tactile.jsx       commandes tactiles à l'écran (stick, A, B, Start)
   commun/avatars.js        avatars des deux kits et couleurs des joueurs
   commun/kit.js            kit de personnages choisi (Quaternius / KayKit), mémorisé
   commun/modeles.jsx       chargement glTF, recoloration, avatars animés (deux kits)
@@ -72,7 +76,16 @@ Les textures `*-tropique.png` sont des versions recolorées (vert tropical) des 
 `kenney-suburban/Textures/colormap-creole.png` donne aux maisons des villes un toit de tôle rouge.
 Les textures de `kaykit-adventurers/textures/` sont les versions péi des personnages KayKit (voir `avatars-reunion2.pdf`).
 
+## Tests
+
+```bash
+npm test           # Vitest + jsdom : chaque écran (salon, plateau, 14 mini-jeux, menu, survol, expo) joué au doigt
+```
+
+La toile 3D est simulée (`src/test/setup.jsx`) : les tests font tourner les vraies boucles de jeu image par image
+et appuient sur les commandes tactiles (`src/test/outils.jsx`).
+
 ## Déploiement
 
-Chaque push sur `main` compile `game/` et le publie sur GitHub Pages (`.github/workflows/pages.yml`).
+Chaque push sur `main` lance les tests, compile `game/` et le publie sur GitHub Pages (`.github/workflows/pages.yml`).
 Réglage à faire une fois : **Settings → Pages → Source : GitHub Actions**.
